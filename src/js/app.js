@@ -15,7 +15,7 @@ app.appendChild(backgroundImage);
 
 // Create the text image overlay
 const textImage = new Image();
-textImage.src = './src/assets/images/placeholder-text.jpg';
+textImage.src = './src/assets/images/placeholder-text.png';
 textImage.style.position = 'absolute';
 textImage.style.top = '50%'; // Center vertically
 textImage.style.left = '50%'; // Center horizontally
@@ -25,7 +25,11 @@ app.appendChild(textImage);
 
 // Function to dynamically adjust text image width
 const adjustTextImageWidth = () => {
-  textImage.style.width = window.innerWidth >= 1024 ? '70vw' : '90vw'; // Adjust width based on screen size
+  if (window.innerWidth >= 1024) {
+    textImage.style.width = '70vw'; // Desktop
+  } else {
+    textImage.style.width = '80vw'; // Mobile and tablet
+  }
 };
 
 // Initial adjustment
@@ -43,17 +47,17 @@ let yOffset = 0;
 
 // Common function to update positions
 const updatePositions = () => {
-  backgroundImage.style.transform = `translateX(calc(-50% + ${xOffset / 4}px))`;
+  backgroundImage.style.transform = `translateX(calc(-50% + ${xOffset / 6}px))`;
   textImage.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px))`;
 };
 
 // Handle mouse movement
 window.addEventListener('mousemove', (event) => {
-  const moveX = (event.clientX / window.innerWidth - 0.5) * 80; // Amplified range
-  const moveY = (event.clientY / window.innerHeight - 0.5) * 80; // Amplified range
+  const moveX = (event.clientX / window.innerWidth - 0.5) * 100; // Amplified range for dramatic effect
+  const moveY = (event.clientY / window.innerHeight - 0.5) * 100; // Amplified range for dramatic effect
 
-  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.15), window.innerWidth * 0.15);
-  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.15), window.innerHeight * 0.15);
+  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
+  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
 
   updatePositions();
 });
@@ -62,11 +66,11 @@ window.addEventListener('mousemove', (event) => {
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
-    const moveX = (touch.clientX / window.innerWidth - 0.5) * 80;
-    const moveY = (touch.clientY / window.innerHeight - 0.5) * 80;
+    const moveX = (touch.clientX / window.innerWidth - 0.5) * 100;
+    const moveY = (touch.clientY / window.innerHeight - 0.5) * 100;
 
-    xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.15), window.innerWidth * 0.15);
-    yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.15), window.innerHeight * 0.15);
+    xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
+    yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
 
     updatePositions();
   }
@@ -74,11 +78,11 @@ window.addEventListener('touchmove', (event) => {
 
 // Handle device orientation
 window.addEventListener('deviceorientation', (event) => {
-  const moveX = (event.gamma / 45) * 80;
-  const moveY = (event.beta / 90) * 80;
+  const moveX = (event.gamma / 45) * 100; // Amplified range
+  const moveY = (event.beta / 90) * 100; // Amplified range
 
-  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.15), window.innerWidth * 0.15);
-  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.15), window.innerHeight * 0.15);
+  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
+  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
 
   updatePositions();
 });
