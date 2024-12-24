@@ -3,7 +3,7 @@ const app = document.getElementById('app');
 
 // Create the background image
 const backgroundImage = new Image();
-backgroundImage.src = './src/assets/images/placeholder-bg.jpg';
+backgroundImage.src = new URL('./assets/images/placeholder-bg.jpg', import.meta.url).href;
 backgroundImage.style.position = 'absolute';
 backgroundImage.style.bottom = '0'; // Stick to the bottom of the viewport
 backgroundImage.style.left = '50%'; // Center horizontally
@@ -15,7 +15,7 @@ app.appendChild(backgroundImage);
 
 // Create the text image overlay
 const textImage = new Image();
-textImage.src = './src/assets/images/placeholder-text.png';
+textImage.src = new URL('./assets/images/placeholder-text.jpg', import.meta.url).href;
 textImage.style.position = 'absolute';
 textImage.style.top = '50%'; // Center vertically
 textImage.style.left = '50%'; // Center horizontally
