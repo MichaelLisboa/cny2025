@@ -1,74 +1,51 @@
-import * as THREE from 'three';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+// Select the app container
+const app = document.getElementById('app');
 
-// Create a scene
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff); // Set background to white
+// Create the image element for the background
+const backgroundImage = new Image();
+backgroundImage.src = './src/assets/images/placeholder-bg.jpg'; // Path to your image
+backgroundImage.style.position = 'absolute';
+backgroundImage.style.bottom = '0'; // Always stick to the bottom
+backgroundImage.style.left = '50%'; // Start horizontally centered
+backgroundImage.style.transform = 'translateX(-50%)'; // Center the image horizontally
+backgroundImage.style.width = 'auto'; // Maintain aspect ratio for width
+backgroundImage.style.height = '110vh'; // Slightly larger than viewport height
+backgroundImage.style.objectFit = 'cover';
+backgroundImage.style.willChange = 'transform';
+app.appendChild(backgroundImage);
 
-// Create a camera
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 10;
+// Variables to track movement
+let xOffset = 0;
 
-// Create a renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio); // High-DPI screens
-renderer.domElement.style.position = 'absolute';
-renderer.domElement.style.top = '0';
-renderer.domElement.style.left = '0';
-renderer.domElement.style.width = '100%';
-renderer.domElement.style.height = '100%';
-document.body.style.margin = '0';
-document.body.style.overflow = 'hidden';
-document.body.appendChild(renderer.domElement);
+// Handle mouse move event
+const handleMouseMove = (event) => {
+  const moveX = (event.clientX / window.innerWidth - 0.5) * 20; // Adjust range
+  xOffset = moveX;
+  updateBackgroundPosition();
+};
 
-// Load Montserrat Font and Add Text
-const loader = new FontLoader();
-loader.load('https://threejs.org/examples/fonts/helvetiker_bold.typeface.json', (font) => {
-  const textGeometry = new TextGeometry('THE YEAR OF THE SNAKE', {
-    font: font,
-    size: 2.5, // Make the text larger
-    height: 0.3,
-  });
+// Handle device orientation for mobile
+const handleDeviceOrientation = (event) => {
+  const moveX = (event.gamma / 45) * 20; // Adjust range
+  xOffset = moveX;
+  updateBackgroundPosition();
+};
 
-  const textMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
-  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  scene.add(textMesh);
-
-  // Center the text
-  textGeometry.computeBoundingBox();
-  const centerOffsetX = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
-  const centerOffsetY = -0.5 * (textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y);
-  textMesh.position.set(centerOffsetX, centerOffsetY, 0);
-
-  // Add rotation interaction
-  const handleRotation = (event) => {
-    if (event.type === 'mousemove') {
-      const rotationX = (event.clientY / window.innerHeight - 0.5) * Math.PI * 0.1;
-      const rotationY = (event.clientX / window.innerWidth - 0.5) * Math.PI * 0.1;
-      textMesh.rotation.x = rotationX;
-      textMesh.rotation.y = rotationY;
-    } else if (event.type === 'deviceorientation') {
-      textMesh.rotation.x = THREE.MathUtils.degToRad(event.beta / 2);
-      textMesh.rotation.y = THREE.MathUtils.degToRad(event.gamma / 2);
-    }
-  };
-
-  window.addEventListener('mousemove', handleRotation);
-  window.addEventListener('deviceorientation', handleRotation);
-});
+// Update the background position
+const updateBackgroundPosition = () => {
+  backgroundImage.style.transform = `translateX(calc(-50% + ${xOffset}px))`; // Keep bottom fixed
+};
 
 // Handle window resize
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  backgroundImage.style.height = `${window.innerHeight * 1.1}px`; // Update height dynamically
+  updateBackgroundPosition();
 });
 
-// Render the scene
-const animate = () => {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-};
-animate();
+// Add event listeners for desktop and mobile
+window.addEventListener('mousemove', handleMouseMove);
+window.addEventListener('deviceorientation', handleDeviceOrientation);
+
+// Set initial height and position
+backgroundImage.style.height = `${window.innerHeight * 1.1}px`;
+updateBackgroundPosition();
