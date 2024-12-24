@@ -1,5 +1,7 @@
 # The Year of the Snake
 
+![CNY 2025 Lantern Experience Preview](src/assets/images/snake-for-github.png)
+
 ## CNY 2025 Wishes in the Sky
 is an open-source 3D experience that merges tradition and technology with purpose and precision. This isn’t fluff, this is intentional design—a platform for creating, sharing, and celebrating Chinese New Year wishes in a dynamic, immersive digital environment. Built for speed, elegance, and seamless interaction, this app is designed for people who demand more from the web.
 
