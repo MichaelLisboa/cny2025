@@ -32,85 +32,42 @@ texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
 texture.repeat.set(1.3, 1.1); // Slight horizontal stretch
 texture.offset.set(0, -0.1); // Adjust vertical alignment (move upward slightly)
 
-// Flag to toggle shader
-let useShader = true;
-
-// Custom shader material to blend texture and gradient
-const shaderMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    texture1: { type: 't', value: texture }
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    uniform sampler2D texture1;
-    varying vec2 vUv;
-    void main() {
-      vec4 color = texture2D(texture1, vUv);
-      float gradient = smoothstep(0.05, 0.75, vUv.y) * (1.0 - smoothstep(0.85, 1.0, vUv.y));
-      gl_FragColor = vec4(color.rgb * gradient, color.a);
-    }
-  `,
-  side: THREE.BackSide,
-  transparent: true,
-  depthWrite: false
-});
-
-// Basic material without shader
-const basicMaterial = new THREE.MeshBasicMaterial({
+// Create the sphere geometry for the background
+// const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+const sphereMaterial = new THREE.MeshBasicMaterial({
   map: texture,
-  side: THREE.BackSide
+  side: THREE.BackSide, // Render on the inside of the sphere
 });
 
-// Create the sphere mesh with initial material
-const skySphere = new THREE.Mesh(sphereGeometry, useShader ? shaderMaterial : basicMaterial);
+// Create the sphere mesh
+const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
 scene.add(skySphere);
-
-// Function to toggle shader
-const toggleShader = () => {
-  useShader = !useShader;
-  skySphere.material = useShader ? shaderMaterial : basicMaterial;
-};
-
-// Add event listener to toggle shader on key press (e.g., 'S' key)
-window.addEventListener('keydown', (event) => {
-  if (event.key === 's' || event.key === 'S') {
-    toggleShader();
-  }
-});
 
 // Function to adjust the sphere size dynamically
 const adjustSphereSize = () => {
   const aspectRatio = window.innerWidth / window.innerHeight;
-  const radius = aspectRatio > 1 ? 800 : 800 / aspectRatio; // Adjust radius based on aspect ratio
-
-  // Update the geometry with the computed radius
-  const newSphereGeometry = new THREE.SphereGeometry(radius, 60, 40);
-  skySphere.geometry.dispose(); // Dispose of the old geometry to free up memory
-  skySphere.geometry = newSphereGeometry; // Apply the updated geometry
+  const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
+  scene.remove(skySphere); // Remove the old sphere
+  const sphereGeometry = new THREE.SphereGeometry(800, 60, 40); // Increased radius
+  skySphere.geometry = sphereGeometry; // Replace the geometry
+  scene.add(skySphere); // Add the updated sphere back to the scene
 };
 
 // Initial adjustment
 adjustSphereSize();
 
-// Consolidate resize handler for Three.js canvas and sphere adjustment
+// Resize handler for Three.js canvas and sphere adjustment
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   adjustSphereSize();
-  adjustTextImageWidth();
 });
 
 // Position the camera inside the sphere
 camera.position.set(0, -50, 0);
-camera.lookAt(0, 50, -100); // Look at the center of the sphere
+camera.lookAt(0, 50, -110); // Look at the center of the sphere
 
 // Create the text image overlay
 const textImage = new Image();
@@ -216,7 +173,6 @@ const animate = () => {
   // Move the text image with gentle motion and floating effect
   textImage.style.transform = `translate(calc(-50% + ${textOffsetX + floatingOffset.x}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
 
-  // Render the scene
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
