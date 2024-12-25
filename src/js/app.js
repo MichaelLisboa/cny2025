@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { gsap } from 'gsap';
+
 // Select the app container
 const app = document.getElementById('app');
 
@@ -5,7 +8,7 @@ const app = document.getElementById('app');
 const backgroundImage = new Image();
 backgroundImage.src = new URL('../assets/images/placeholder-bg.jpg', import.meta.url).href;
 backgroundImage.style.position = 'absolute';
-backgroundImage.style.bottom = '0'; // Stick to the bottom of the viewport
+backgroundImage.style.top = '0'; // Stick to the top of the viewport
 backgroundImage.style.left = '50%'; // Center horizontally
 backgroundImage.style.transform = 'translateX(-50%)';
 backgroundImage.style.height = '110vh'; // Slightly larger than the viewport height
@@ -45,10 +48,24 @@ window.addEventListener('resize', () => {
 let xOffset = 0;
 let yOffset = 0;
 
-// Common function to update positions
+// GSAP Floating Animation for Logo
+gsap.to(textImage, {
+  y: 20, // Move up and down by 20px
+  repeat: -1, // Infinite repetition
+  yoyo: true, // Reverse the animation after each cycle
+  ease: 'sine.inOut', // Smooth easing
+  duration: 3, // 3-second cycle
+});
+
+// Three.js Clock for Smooth Position Updates
+const clock = new THREE.Clock();
+
+// Function to smoothly update positions
 const updatePositions = () => {
-  backgroundImage.style.transform = `translateX(calc(-50% + ${xOffset / 6}px))`;
-  textImage.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px))`;
+  const elapsedTime = clock.getElapsedTime();
+  const waveOffset = Math.sin(elapsedTime * 2) * 5; // Add a subtle wave effect to textImage
+  backgroundImage.style.transform = `translateX(-50%) rotateX(${yOffset / 10}deg) rotateY(${xOffset / 10}deg)`;
+  textImage.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset + waveOffset}px))`;
 };
 
 // Handle mouse movement
@@ -76,13 +93,21 @@ window.addEventListener('touchmove', (event) => {
   }
 });
 
-// Handle device orientation
+// Handle device orientation for background rotation
 window.addEventListener('deviceorientation', (event) => {
-  const moveX = (event.gamma / 45) * 100; // Amplified range
-  const moveY = (event.beta / 90) * 100; // Amplified range
+  const rotateX = event.beta - 90; // Tilt along X-axis
+  const rotateY = event.gamma; // Tilt along Y-axis
 
-  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
-  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
+  // Limit rotation to prevent extreme distortion
+  const limitedRotateX = Math.min(Math.max(rotateX, -45), 45);
+  const limitedRotateY = Math.min(Math.max(rotateY, -45), 45);
 
-  updatePositions();
+  backgroundImage.style.transform = `translateX(-50%) rotateX(${limitedRotateX}deg) rotateY(${limitedRotateY}deg)`;
 });
+
+// Animation Loop
+const animate = () => {
+  updatePositions();
+  requestAnimationFrame(animate);
+};
+animate();
