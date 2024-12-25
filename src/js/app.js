@@ -7,7 +7,7 @@ const app = document.getElementById('app');
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  90,
+  60,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -21,7 +21,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
 
 // Create a sphere geometry for the 360-degree background
-const sphereGeometry = new THREE.SphereGeometry(800, 60, 40);
+const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 // Create the texture with adjustments for alignment
 const texture = new THREE.TextureLoader().load(
   new URL('../assets/images/starry-sky.jpg', import.meta.url).href
@@ -29,44 +29,88 @@ const texture = new THREE.TextureLoader().load(
 texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
 texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
 texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
-texture.repeat.set(1, 1); // Slight horizontal stretch
-texture.offset.set(0, 0.15); // Adjust vertical alignment (move upward slightly)
+texture.repeat.set(1.3, 1.1); // Slight horizontal stretch
+texture.offset.set(0, -0.1); // Adjust vertical alignment (move upward slightly)
 
-// Create the sphere geometry for the background
-// const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
-const sphereMaterial = new THREE.MeshBasicMaterial({
-  map: texture,
-  side: THREE.BackSide, // Render on the inside of the sphere
+// Flag to toggle shader
+let useShader = true;
+
+// Custom shader material to blend texture and gradient
+const shaderMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    texture1: { type: 't', value: texture }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D texture1;
+    varying vec2 vUv;
+    void main() {
+      vec4 color = texture2D(texture1, vUv);
+      float gradient = smoothstep(0.05, 0.75, vUv.y) * (1.0 - smoothstep(0.85, 1.0, vUv.y));
+      gl_FragColor = vec4(color.rgb * gradient, color.a);
+    }
+  `,
+  side: THREE.BackSide,
+  transparent: true,
+  depthWrite: false
 });
 
-// Create the sphere mesh
-const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+// Basic material without shader
+const basicMaterial = new THREE.MeshBasicMaterial({
+  map: texture,
+  side: THREE.BackSide
+});
+
+// Create the sphere mesh with initial material
+const skySphere = new THREE.Mesh(sphereGeometry, useShader ? shaderMaterial : basicMaterial);
 skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
 scene.add(skySphere);
+
+// Function to toggle shader
+const toggleShader = () => {
+  useShader = !useShader;
+  skySphere.material = useShader ? shaderMaterial : basicMaterial;
+};
+
+// Add event listener to toggle shader on key press (e.g., 'S' key)
+window.addEventListener('keydown', (event) => {
+  if (event.key === 's' || event.key === 'S') {
+    toggleShader();
+  }
+});
 
 // Function to adjust the sphere size dynamically
 const adjustSphereSize = () => {
   const aspectRatio = window.innerWidth / window.innerHeight;
-  const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
-  scene.remove(skySphere); // Remove the old sphere
-  const sphereGeometry = new THREE.SphereGeometry(800, 60, 40); // Increased radius
-  skySphere.geometry = sphereGeometry; // Replace the geometry
-  scene.add(skySphere); // Add the updated sphere back to the scene
+  const radius = aspectRatio > 1 ? 800 : 800 / aspectRatio; // Adjust radius based on aspect ratio
+
+  // Update the geometry with the computed radius
+  const newSphereGeometry = new THREE.SphereGeometry(radius, 60, 40);
+  skySphere.geometry.dispose(); // Dispose of the old geometry to free up memory
+  skySphere.geometry = newSphereGeometry; // Apply the updated geometry
 };
 
 // Initial adjustment
 adjustSphereSize();
 
-// Resize handler for Three.js canvas and sphere adjustment
+// Consolidate resize handler for Three.js canvas and sphere adjustment
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   adjustSphereSize();
+  adjustTextImageWidth();
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, 0, 0.1);
+camera.position.set(0, -50, 0);
+camera.lookAt(0, 50, -100); // Look at the center of the sphere
 
 // Create the text image overlay
 const textImage = new Image();
@@ -98,7 +142,7 @@ window.addEventListener('resize', () => {
 // Variables for movement
 let targetXRotation = 0; // Target horizontal rotation for the sky
 let targetYRotation = 0; // Target vertical rotation for the sky
-const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
+const verticalLimit = Math.PI / 18; // Limit vertical movement to ±22.5 degrees
 
 let xRotation = 0; // Smoothed horizontal rotation
 let yRotation = 0; // Smoothed vertical rotation
@@ -172,6 +216,7 @@ const animate = () => {
   // Move the text image with gentle motion and floating effect
   textImage.style.transform = `translate(calc(-50% + ${textOffsetX + floatingOffset.x}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
 
+  // Render the scene
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
