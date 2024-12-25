@@ -7,7 +7,7 @@ const app = document.getElementById('app');
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  60,
+  80,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -29,8 +29,8 @@ const texture = new THREE.TextureLoader().load(
 texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
 texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
 texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
-texture.repeat.set(1.3, 1.1); // Slight horizontal stretch
-texture.offset.set(0, -0.1); // Adjust vertical alignment (move upward slightly)
+texture.repeat.set(1, 1.1); // Slight horizontal stretch
+texture.offset.set(1, -0.225); // Adjust vertical alignment (move upward slightly)
 
 // Create the sphere geometry for the background
 // const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
@@ -49,7 +49,7 @@ const adjustSphereSize = () => {
   const aspectRatio = window.innerWidth / window.innerHeight;
   const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
   scene.remove(skySphere); // Remove the old sphere
-  const sphereGeometry = new THREE.SphereGeometry(800, 60, 40); // Increased radius
+  const sphereGeometry = new THREE.SphereGeometry(300, 500, 500); // Increased radius
   skySphere.geometry = sphereGeometry; // Replace the geometry
   scene.add(skySphere); // Add the updated sphere back to the scene
 };
@@ -66,8 +66,8 @@ window.addEventListener('resize', () => {
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, -50, 0);
-camera.lookAt(0, 50, -110); // Look at the center of the sphere
+camera.position.set(0, -80, 0);
+camera.lookAt(0, 50, -225); // Look at the center of the sphere
 
 // Create the text image overlay
 const textImage = new Image();
@@ -99,7 +99,7 @@ window.addEventListener('resize', () => {
 // Variables for movement
 let targetXRotation = 0; // Target horizontal rotation for the sky
 let targetYRotation = 0; // Target vertical rotation for the sky
-const verticalLimit = Math.PI / 18; // Limit vertical movement to ±22.5 degrees
+const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
 
 let xRotation = 0; // Smoothed horizontal rotation
 let yRotation = 0; // Smoothed vertical rotation
