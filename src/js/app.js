@@ -90,7 +90,8 @@ let textOffsetY = 0; // Text vertical offset
 // GSAP Floating Animation for Text
 const floatingOffset = { x: 0, y: 0 }; // For subtle floating effect
 gsap.to(floatingOffset, {
-  y: 10, // Move up and down by 10px
+  y: 30, // Move up and down by 10px
+  x: 10, // Move left and right by 10px
   repeat: -1, // Infinite repetition
   yoyo: true, // Reverse the animation after each cycle
   ease: 'sine.inOut', // Smooth easing
@@ -143,7 +144,7 @@ const animate = () => {
   skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
 
   // Move the text image with gentle motion and floating effect
-  textImage.style.transform = `translate(calc(-50% + ${textOffsetX}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
+  textImage.style.transform = `translate(calc(-50% + ${textOffsetX + floatingOffset.x}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
