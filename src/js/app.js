@@ -7,7 +7,7 @@ const app = document.getElementById('app');
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  75,
+  70,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -18,11 +18,20 @@ renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
 
 // Create a sphere geometry for the 360-degree background
-let sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+// Create a sphere geometry for the 360-degree background
+const sphereGeometry = new THREE.SphereGeometry(800, 60, 40);
+const texture = new THREE.TextureLoader().load(
+  new URL('../assets/images/starry-sky.jpg', import.meta.url).href
+);
+
+// Adjust the texture scaling
+texture.wrapS = THREE.RepeatWrapping; // Allow repeating horizontally
+texture.wrapT = THREE.ClampToEdgeWrapping; // Clamp vertically to avoid tiling artifacts
+texture.repeat.set(1, 1); // Adjust these values to scale the texture
+texture.offset.set(0, 0); // Optional: Adjust offset if needed to shift the image
+
 const sphereMaterial = new THREE.MeshBasicMaterial({
-  map: new THREE.TextureLoader().load(
-    new URL('../assets/images/placeholder-bg.jpg', import.meta.url).href
-  ),
+  map: texture,
   side: THREE.BackSide, // Render the texture on the inside
 });
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -33,7 +42,7 @@ const adjustSphereSize = () => {
   const aspectRatio = window.innerWidth / window.innerHeight;
   const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
   scene.remove(skySphere); // Remove the old sphere
-  sphereGeometry = new THREE.SphereGeometry(radius, 60, 40); // Create a new sphere with the adjusted radius
+  const sphereGeometry = new THREE.SphereGeometry(800, 60, 40); // Increased radius
   skySphere.geometry = sphereGeometry; // Replace the geometry
   scene.add(skySphere); // Add the updated sphere back to the scene
 };
@@ -65,7 +74,7 @@ app.appendChild(textImage);
 // Function to dynamically adjust text image width
 const adjustTextImageWidth = () => {
   if (window.innerWidth >= 1024) {
-    textImage.style.width = '70vw'; // Desktop
+    textImage.style.width = '30vw'; // Desktop
   } else {
     textImage.style.width = '80vw'; // Mobile and tablet
   }
