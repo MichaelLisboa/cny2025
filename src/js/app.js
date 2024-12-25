@@ -7,12 +7,15 @@ const app = document.getElementById('app');
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  70,
+  80,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
 const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.outputEncoding = THREE.sRGBEncoding; // Ensure correct color encoding
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
@@ -21,10 +24,11 @@ app.appendChild(renderer.domElement);
 // Create a sphere geometry for the 360-degree background
 const sphereGeometry = new THREE.SphereGeometry(800, 60, 40);
 const texture = new THREE.TextureLoader().load(
-  new URL('../assets/images/starry-sky.jpg', import.meta.url).href
+  new URL('../assets/images/starry-sky.png', import.meta.url).href
 );
 
 // Adjust the texture scaling
+texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
 texture.wrapS = THREE.RepeatWrapping; // Allow repeating horizontally
 texture.wrapT = THREE.ClampToEdgeWrapping; // Clamp vertically to avoid tiling artifacts
 texture.repeat.set(1, 1); // Adjust these values to scale the texture
