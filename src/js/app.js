@@ -41,7 +41,7 @@ const sphereMaterial = new THREE.MeshBasicMaterial({
 // Create the sphere mesh
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
-skySphere.scale.y = 1.5; // Stretch the vertical height
+skySphere.scale.y = 1.25; // Stretch the vertical height
 scene.add(skySphere);
 
 // Function to adjust the sphere size dynamically
@@ -51,7 +51,7 @@ const adjustSphereSize = () => {
   scene.remove(skySphere); // Remove the old sphere
   const sphereGeometry = new THREE.SphereGeometry(newRadius, 60, 40); // Adjusted radius
   skySphere.geometry = sphereGeometry; // Replace the geometry
-  skySphere.scale.y = 1.5; // Stretch the vertical height
+  skySphere.scale.y = 1.25; // Stretch the vertical height
   scene.add(skySphere); // Add the updated sphere back to the scene
 };
 
@@ -82,7 +82,7 @@ app.appendChild(textImage);
 
 // Function to dynamically adjust text image width
 const adjustTextImageWidth = () => {
-  if (window.innerWidth >= 1024) {
+  if (window.innerWidth > 1024) {
     textImage.style.width = '30vw'; // Desktop
   } else {
     textImage.style.width = '80vw'; // Mobile and tablet
