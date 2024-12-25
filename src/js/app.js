@@ -4,17 +4,39 @@ import { gsap } from 'gsap';
 // Select the app container
 const app = document.getElementById('app');
 
-// Create the background image
-const backgroundImage = new Image();
-backgroundImage.src = new URL('../assets/images/placeholder-bg.jpg', import.meta.url).href;
-backgroundImage.style.position = 'absolute';
-backgroundImage.style.top = '0'; // Stick to the top of the viewport
-backgroundImage.style.left = '50%'; // Center horizontally
-backgroundImage.style.transform = 'translateX(-50%)';
-backgroundImage.style.height = '110vh'; // Slightly larger than the viewport height
-backgroundImage.style.objectFit = 'cover';
-backgroundImage.style.willChange = 'transform';
-app.appendChild(backgroundImage);
+// Set up Three.js Scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+app.appendChild(renderer.domElement);
+
+// Create a sphere geometry for the 360-degree background
+const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+const sphereMaterial = new THREE.MeshBasicMaterial({
+  map: new THREE.TextureLoader().load(
+    new URL('../assets/images/placeholder-bg.jpg', import.meta.url).href
+  ),
+  side: THREE.BackSide, // Render the texture on the inside
+});
+const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+scene.add(skySphere);
+
+// Position the camera inside the sphere
+camera.position.set(0, 0, 0.1);
+
+// Resize handler for Three.js canvas
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 
 // Create the text image overlay
 const textImage = new Image();
@@ -41,14 +63,13 @@ adjustTextImageWidth();
 // Re-adjust on window resize
 window.addEventListener('resize', () => {
   adjustTextImageWidth();
-  backgroundImage.style.height = `${window.innerHeight * 1.1}px`; // Dynamically update height
 });
 
 // Variables to track movement
-let xOffset = 0;
-let yOffset = 0;
+let xRotation = 0;
+let yRotation = 0;
 
-// GSAP Floating Animation for Logo
+// GSAP Floating Animation for Text
 gsap.to(textImage, {
   y: 20, // Move up and down by 20px
   repeat: -1, // Infinite repetition
@@ -57,57 +78,41 @@ gsap.to(textImage, {
   duration: 3, // 3-second cycle
 });
 
-// Three.js Clock for Smooth Position Updates
-const clock = new THREE.Clock();
-
-// Function to smoothly update positions
-const updatePositions = () => {
-  const elapsedTime = clock.getElapsedTime();
-  const waveOffset = Math.sin(elapsedTime * 2) * 5; // Add a subtle wave effect to textImage
-  backgroundImage.style.transform = `translateX(-50%) rotateX(${yOffset / 10}deg) rotateY(${xOffset / 10}deg)`;
-  textImage.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset + waveOffset}px))`;
-};
-
-// Handle mouse movement
+// Handle mouse movement for 360-degree rotation
 window.addEventListener('mousemove', (event) => {
-  const moveX = (event.clientX / window.innerWidth - 0.5) * 100; // Amplified range for dramatic effect
-  const moveY = (event.clientY / window.innerHeight - 0.5) * 100; // Amplified range for dramatic effect
+  const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
+  const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
-  xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
-  yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
-
-  updatePositions();
+  xRotation = moveX;
+  yRotation = moveY;
 });
 
-// Handle touch gestures
+// Handle touch gestures for 360-degree rotation
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
-    const moveX = (touch.clientX / window.innerWidth - 0.5) * 100;
-    const moveY = (touch.clientY / window.innerHeight - 0.5) * 100;
+    const moveX = (touch.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
+    const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
 
-    xOffset = Math.min(Math.max(moveX, -window.innerWidth * 0.2), window.innerWidth * 0.2);
-    yOffset = Math.min(Math.max(moveY, -window.innerHeight * 0.2), window.innerHeight * 0.2);
-
-    updatePositions();
+    xRotation = moveX;
+    yRotation = moveY;
   }
 });
 
-// Handle device orientation for background rotation
+// Handle device orientation for 360-degree rotation
 window.addEventListener('deviceorientation', (event) => {
-  const rotateX = event.beta - 90; // Tilt along X-axis
-  const rotateY = event.gamma; // Tilt along Y-axis
+  const rotateX = event.beta / 180 * Math.PI; // Convert beta to radians
+  const rotateY = event.gamma / 90 * Math.PI; // Convert gamma to radians
 
-  // Limit rotation to prevent extreme distortion
-  const limitedRotateX = Math.min(Math.max(rotateX, -45), 45);
-  const limitedRotateY = Math.min(Math.max(rotateY, -45), 45);
-
-  backgroundImage.style.transform = `translateX(-50%) rotateX(${limitedRotateX}deg) rotateY(${limitedRotateY}deg)`;
+  xRotation = rotateY;
+  yRotation = rotateX;
 });
 
 // Animation Loop
 const animate = () => {
-  updatePositions();
+  skySphere.rotation.y = xRotation; // Rotate horizontally
+  skySphere.rotation.x = yRotation; // Rotate vertically
+  renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
 animate();
