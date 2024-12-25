@@ -7,7 +7,7 @@ const app = document.getElementById('app');
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  80,
+  90,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -21,24 +21,27 @@ renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
 
 // Create a sphere geometry for the 360-degree background
-// Create a sphere geometry for the 360-degree background
 const sphereGeometry = new THREE.SphereGeometry(800, 60, 40);
+// Create the texture with adjustments for alignment
 const texture = new THREE.TextureLoader().load(
-  new URL('../assets/images/starry-sky.png', import.meta.url).href
+  new URL('../assets/images/starry-sky.jpg', import.meta.url).href
 );
-
-// Adjust the texture scaling
 texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
-texture.wrapS = THREE.RepeatWrapping; // Allow repeating horizontally
-texture.wrapT = THREE.ClampToEdgeWrapping; // Clamp vertically to avoid tiling artifacts
-texture.repeat.set(1, 1); // Adjust these values to scale the texture
-texture.offset.set(0, 0); // Optional: Adjust offset if needed to shift the image
+texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
+texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
+texture.repeat.set(1, 1); // Slight horizontal stretch
+texture.offset.set(0, 0.15); // Adjust vertical alignment (move upward slightly)
 
+// Create the sphere geometry for the background
+// const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 const sphereMaterial = new THREE.MeshBasicMaterial({
   map: texture,
-  side: THREE.BackSide, // Render the texture on the inside
+  side: THREE.BackSide, // Render on the inside of the sphere
 });
+
+// Create the sphere mesh
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
 scene.add(skySphere);
 
 // Function to adjust the sphere size dynamically
