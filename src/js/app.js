@@ -47,9 +47,9 @@ scene.add(skySphere);
 // Function to adjust the sphere size dynamically
 const adjustSphereSize = () => {
   const aspectRatio = window.innerWidth / window.innerHeight;
-  const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
+  const newRadius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
   scene.remove(skySphere); // Remove the old sphere
-  const sphereGeometry = new THREE.SphereGeometry(300, 500, 500); // Increased radius
+  const sphereGeometry = new THREE.SphereGeometry(newRadius, 60, 40); // Adjusted radius
   skySphere.geometry = sphereGeometry; // Replace the geometry
   skySphere.scale.y = 1.5; // Stretch the vertical height
   scene.add(skySphere); // Add the updated sphere back to the scene
