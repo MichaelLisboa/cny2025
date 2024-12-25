@@ -66,8 +66,9 @@ window.addEventListener('resize', () => {
 });
 
 // Variables to track movement
-let xRotation = 0;
-let yRotation = 0;
+let xRotation = 0; // Horizontal rotation
+let yRotation = 0; // Vertical rotation
+const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
 
 // GSAP Floating Animation for Text
 gsap.to(textImage, {
@@ -84,7 +85,7 @@ window.addEventListener('mousemove', (event) => {
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
   xRotation = moveX;
-  yRotation = moveY;
+  yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
 });
 
 // Handle touch gestures for 360-degree rotation
@@ -95,23 +96,23 @@ window.addEventListener('touchmove', (event) => {
     const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
 
     xRotation = moveX;
-    yRotation = moveY;
+    yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
   }
 });
 
 // Handle device orientation for 360-degree rotation
 window.addEventListener('deviceorientation', (event) => {
-  const rotateX = event.beta / 180 * Math.PI; // Convert beta to radians
-  const rotateY = event.gamma / 90 * Math.PI; // Convert gamma to radians
+  const rotateX = (event.beta / 180) * Math.PI; // Convert beta to radians
+  const rotateY = (event.gamma / 90) * Math.PI; // Convert gamma to radians
 
   xRotation = rotateY;
-  yRotation = rotateX;
+  yRotation = Math.max(Math.min(-rotateX, verticalLimit), -verticalLimit); // Flip and clamp vertical rotation
 });
 
 // Animation Loop
 const animate = () => {
   skySphere.rotation.y = xRotation; // Rotate horizontally
-  skySphere.rotation.x = yRotation; // Rotate vertically
+  skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
