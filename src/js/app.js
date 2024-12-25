@@ -33,7 +33,6 @@ texture.repeat.set(1, 1.1); // Slight horizontal stretch
 texture.offset.set(1, -0.225); // Adjust vertical alignment (move upward slightly)
 
 // Create the sphere geometry for the background
-// const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 const sphereMaterial = new THREE.MeshBasicMaterial({
   map: texture,
   side: THREE.BackSide, // Render on the inside of the sphere
@@ -42,6 +41,7 @@ const sphereMaterial = new THREE.MeshBasicMaterial({
 // Create the sphere mesh
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
+skySphere.scale.y = 1.5; // Stretch the vertical height
 scene.add(skySphere);
 
 // Function to adjust the sphere size dynamically
@@ -51,6 +51,7 @@ const adjustSphereSize = () => {
   scene.remove(skySphere); // Remove the old sphere
   const sphereGeometry = new THREE.SphereGeometry(300, 500, 500); // Increased radius
   skySphere.geometry = sphereGeometry; // Replace the geometry
+  skySphere.scale.y = 1.5; // Stretch the vertical height
   scene.add(skySphere); // Add the updated sphere back to the scene
 };
 
@@ -66,8 +67,8 @@ window.addEventListener('resize', () => {
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, -80, 0);
-camera.lookAt(0, 50, -225); // Look at the center of the sphere
+camera.position.set(0, -250, 0); // Lower the camera position to simulate standing on the ground
+camera.lookAt(0, 0, -500); // Look at the center of the sphere
 
 // Create the text image overlay
 const textImage = new Image();
@@ -104,36 +105,29 @@ const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
 let xRotation = 0; // Smoothed horizontal rotation
 let yRotation = 0; // Smoothed vertical rotation
 
-let textOffsetX = 0; // Text horizontal offset
-let textOffsetY = 0; // Text vertical offset
-
 // GSAP Floating Animation for Text
 const floatingOffset = { x: 0, y: 0 }; // For subtle floating effect
-gsap.to(floatingOffset, {
-  y: 30, // Move up and down by 30px
-  x: 10, // Move left and right by 10px
-  repeat: -1, // Infinite repetition
-  yoyo: true, // Reverse the animation after each cycle
+const floatingTimeline = gsap.timeline({ repeat: -1, yoyo: true });
+floatingTimeline.to(floatingOffset, {
+  y: gsap.utils.random(20, 50, true), // Randomize vertical movement
+  x: gsap.utils.random(10, 30, true), // Randomize horizontal movement
   ease: 'sine.inOut', // Smooth easing
-  duration: 3, // 3-second cycle
+  duration: gsap.utils.random(2, 4, true) // Randomize duration
 });
 
 // Function to smooth rotations
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
-// Handle mouse movement for sky and text rotation
+// Handle mouse movement for sky rotation
 window.addEventListener('mousemove', (event) => {
   const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
   targetXRotation = moveX;
   targetYRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
-
-  textOffsetX = (event.clientX / window.innerWidth - 0.5) * 20; // Gentle text movement
-  textOffsetY = (event.clientY / window.innerHeight - 0.5) * 20; // Gentle text movement
 });
 
-// Handle touch gestures for sky and text rotation
+// Handle touch gestures for sky rotation
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
@@ -142,22 +136,16 @@ window.addEventListener('touchmove', (event) => {
 
     targetXRotation = moveX;
     targetYRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
-
-    textOffsetX = (touch.clientX / window.innerWidth - 0.5) * 20; // Gentle text movement
-    textOffsetY = (touch.clientY / window.innerHeight - 0.5) * 20; // Gentle text movement
   }
 });
 
-// Handle device orientation for sky and text rotation
+// Handle device orientation for sky rotation
 window.addEventListener('deviceorientation', (event) => {
   const rotateX = (event.beta / 180) * Math.PI; // Convert beta to radians
   const rotateY = (event.gamma / 90) * Math.PI; // Convert gamma to radians
 
   targetXRotation = rotateY;
   targetYRotation = Math.max(Math.min(-rotateX, verticalLimit), -verticalLimit); // Flip and clamp vertical rotation
-
-  textOffsetX = (event.gamma / 90) * 20; // Gentle text movement
-  textOffsetY = (event.beta / 180) * 20; // Gentle text movement
 });
 
 // Animation Loop
@@ -171,7 +159,7 @@ const animate = () => {
   skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
 
   // Move the text image with gentle motion and floating effect
-  textImage.style.transform = `translate(calc(-50% + ${textOffsetX + floatingOffset.x}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
+  textImage.style.transform = `translate(calc(-50% + ${floatingOffset.x}px), calc(-50% + ${floatingOffset.y}px))`;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
