@@ -18,7 +18,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
 
 // Create a sphere geometry for the 360-degree background
-const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+let sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 const sphereMaterial = new THREE.MeshBasicMaterial({
   map: new THREE.TextureLoader().load(
     new URL('../assets/images/placeholder-bg.jpg', import.meta.url).href
@@ -28,15 +28,29 @@ const sphereMaterial = new THREE.MeshBasicMaterial({
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(skySphere);
 
-// Position the camera inside the sphere
-camera.position.set(0, 0, 0.1);
+// Function to adjust the sphere size dynamically
+const adjustSphereSize = () => {
+  const aspectRatio = window.innerWidth / window.innerHeight;
+  const radius = aspectRatio > 1 ? 500 : 500 / aspectRatio; // Adjust based on aspect ratio
+  scene.remove(skySphere); // Remove the old sphere
+  sphereGeometry = new THREE.SphereGeometry(radius, 60, 40); // Create a new sphere with the adjusted radius
+  skySphere.geometry = sphereGeometry; // Replace the geometry
+  scene.add(skySphere); // Add the updated sphere back to the scene
+};
 
-// Resize handler for Three.js canvas
+// Initial adjustment
+adjustSphereSize();
+
+// Resize handler for Three.js canvas and sphere adjustment
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  adjustSphereSize();
 });
+
+// Position the camera inside the sphere
+camera.position.set(0, 0, 0.1);
 
 // Create the text image overlay
 const textImage = new Image();
@@ -66,9 +80,14 @@ window.addEventListener('resize', () => {
 });
 
 // Variables to track movement
-let xRotation = 0; // Horizontal rotation
-let yRotation = 0; // Vertical rotation
+let xRotation = 0; // Horizontal rotation for the sky
+let yRotation = 0; // Vertical rotation for the sky
 const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
+
+let xOffset = 0; // Horizontal movement for the text
+let yOffset = 0; // Vertical movement for the text
+let textOffsetX = 0; // Slower offset for text horizontal movement
+let textOffsetY = 0; // Slower offset for text vertical movement
 
 // GSAP Floating Animation for Text
 gsap.to(textImage, {
@@ -79,16 +98,19 @@ gsap.to(textImage, {
   duration: 3, // 3-second cycle
 });
 
-// Handle mouse movement for 360-degree rotation
+// Handle mouse movement for sky and text rotation
 window.addEventListener('mousemove', (event) => {
   const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
   xRotation = moveX;
   yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
+
+  textOffsetX = (event.clientX / window.innerWidth - 0.5) * 20; // Slower movement for text
+  textOffsetY = (event.clientY / window.innerHeight - 0.5) * 20; // Slower movement for text
 });
 
-// Handle touch gestures for 360-degree rotation
+// Handle touch gestures for sky and text rotation
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
@@ -97,22 +119,33 @@ window.addEventListener('touchmove', (event) => {
 
     xRotation = moveX;
     yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
+
+    textOffsetX = (touch.clientX / window.innerWidth - 0.5) * 20; // Slower movement for text
+    textOffsetY = (touch.clientY / window.innerHeight - 0.5) * 20; // Slower movement for text
   }
 });
 
-// Handle device orientation for 360-degree rotation
+// Handle device orientation for sky and text rotation
 window.addEventListener('deviceorientation', (event) => {
   const rotateX = (event.beta / 180) * Math.PI; // Convert beta to radians
   const rotateY = (event.gamma / 90) * Math.PI; // Convert gamma to radians
 
   xRotation = rotateY;
   yRotation = Math.max(Math.min(-rotateX, verticalLimit), -verticalLimit); // Flip and clamp vertical rotation
+
+  textOffsetX = (event.gamma / 90) * 20; // Slower movement for text
+  textOffsetY = (event.beta / 180) * 20; // Slower movement for text
 });
 
 // Animation Loop
 const animate = () => {
+  // Rotate the sky
   skySphere.rotation.y = xRotation; // Rotate horizontally
   skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
+
+  // Move the text image with slower motion
+  textImage.style.transform = `translate(calc(-50% + ${textOffsetX}px), calc(-50% + ${textOffsetY}px))`;
+
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
