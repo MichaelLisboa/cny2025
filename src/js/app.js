@@ -84,14 +84,13 @@ let xRotation = 0; // Horizontal rotation for the sky
 let yRotation = 0; // Vertical rotation for the sky
 const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
 
-let xOffset = 0; // Horizontal movement for the text
-let yOffset = 0; // Vertical movement for the text
-let textOffsetX = 0; // Slower offset for text horizontal movement
-let textOffsetY = 0; // Slower offset for text vertical movement
+let textOffsetX = 0; // Text horizontal offset
+let textOffsetY = 0; // Text vertical offset
 
 // GSAP Floating Animation for Text
-gsap.to(textImage, {
-  y: 20, // Move up and down by 20px
+const floatingOffset = { x: 0, y: 0 }; // For subtle floating effect
+gsap.to(floatingOffset, {
+  y: 10, // Move up and down by 10px
   repeat: -1, // Infinite repetition
   yoyo: true, // Reverse the animation after each cycle
   ease: 'sine.inOut', // Smooth easing
@@ -106,8 +105,8 @@ window.addEventListener('mousemove', (event) => {
   xRotation = moveX;
   yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
 
-  textOffsetX = (event.clientX / window.innerWidth - 0.5) * 20; // Slower movement for text
-  textOffsetY = (event.clientY / window.innerHeight - 0.5) * 20; // Slower movement for text
+  textOffsetX = (event.clientX / window.innerWidth - 0.5) * 20; // Gentle text movement
+  textOffsetY = (event.clientY / window.innerHeight - 0.5) * 20; // Gentle text movement
 });
 
 // Handle touch gestures for sky and text rotation
@@ -120,8 +119,8 @@ window.addEventListener('touchmove', (event) => {
     xRotation = moveX;
     yRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
 
-    textOffsetX = (touch.clientX / window.innerWidth - 0.5) * 20; // Slower movement for text
-    textOffsetY = (touch.clientY / window.innerHeight - 0.5) * 20; // Slower movement for text
+    textOffsetX = (touch.clientX / window.innerWidth - 0.5) * 20; // Gentle text movement
+    textOffsetY = (touch.clientY / window.innerHeight - 0.5) * 20; // Gentle text movement
   }
 });
 
@@ -133,8 +132,8 @@ window.addEventListener('deviceorientation', (event) => {
   xRotation = rotateY;
   yRotation = Math.max(Math.min(-rotateX, verticalLimit), -verticalLimit); // Flip and clamp vertical rotation
 
-  textOffsetX = (event.gamma / 90) * 20; // Slower movement for text
-  textOffsetY = (event.beta / 180) * 20; // Slower movement for text
+  textOffsetX = (event.gamma / 90) * 20; // Gentle text movement
+  textOffsetY = (event.beta / 180) * 20; // Gentle text movement
 });
 
 // Animation Loop
@@ -143,8 +142,8 @@ const animate = () => {
   skySphere.rotation.y = xRotation; // Rotate horizontally
   skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
 
-  // Move the text image with slower motion
-  textImage.style.transform = `translate(calc(-50% + ${textOffsetX}px), calc(-50% + ${textOffsetY}px))`;
+  // Move the text image with gentle motion and floating effect
+  textImage.style.transform = `translate(calc(-50% + ${textOffsetX}px), calc(-50% + ${textOffsetY + floatingOffset.y}px))`;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
