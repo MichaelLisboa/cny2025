@@ -8,7 +8,7 @@ const isMobile = window.innerWidth <= 1024;
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  60,
+  80,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -21,6 +21,26 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
 
+// Parameters for camera positioning, rotation, tilt, and texture settings
+const params = {
+  camera: {
+    position: { x: 0, y: -1.6, z: 0 }, // Camera position (1.6 meters above the ground)
+    lookAt: { x: 0, y: 0, z: -1 }, // Camera lookAt position
+    mobilePosition: { x: 0, y: -1.6, z: 0.1 }, // Mobile camera position
+    mobileLookAt: { x: 0, y: 0, z: -1 }, // Mobile camera lookAt position
+    maxTiltUp: Math.PI / 4, // Maximum angle to tilt up (45 degrees)
+    maxTiltDown: -Math.PI / 12 // Limit to just slightly below the horizon (15 degrees)
+  },
+  texture: {
+    repeat: { x: 1, y: 1 }, // Texture repeat settings
+    offset: { x: 1, y: 0 } // Texture offset settings
+  },
+  sphere: {
+    scaleY: 1.5, // Vertical scale of the sphere
+    scaleX: 2 // Horizontal scale of the sphere
+  }
+};
+
 // Create a sphere geometry for the 360-degree background
 const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 // Create the texture with adjustments for alignment
@@ -30,8 +50,8 @@ const texture = new THREE.TextureLoader().load(
 texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
 texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
 texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
-texture.repeat.set(1, 1.1); // Slight horizontal stretch
-texture.offset.set(1, -0.225); // Adjust vertical alignment (move upward slightly)
+texture.repeat.set(params.texture.repeat.x, params.texture.repeat.y); // Apply texture repeat settings
+texture.offset.set(params.texture.offset.x, params.texture.offset.y); // Apply texture offset settings
 
 // Create the sphere geometry for the background
 const sphereMaterial = new THREE.MeshBasicMaterial({
@@ -42,7 +62,7 @@ const sphereMaterial = new THREE.MeshBasicMaterial({
 // Create the sphere mesh
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
-skySphere.scale.y = 1.5; // Stretch the vertical height
+skySphere.scale.y = params.sphere.scaleY; // Stretch the vertical height
 scene.add(skySphere);
 
 // Resize handler for Three.js canvas and sphere adjustment
@@ -53,13 +73,13 @@ window.addEventListener('resize', () => {
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, 0, 0);
+camera.position.set(params.camera.position.x, params.camera.position.y, params.camera.position.z);
 
 if (isMobile) {
-  camera.position.set(0, 0, 0.1);
-  camera.lookAt(0, -100, -200);
+  camera.position.set(params.camera.mobilePosition.x, params.camera.mobilePosition.y, params.camera.mobilePosition.z);
+  camera.lookAt(params.camera.mobileLookAt.x, params.camera.mobileLookAt.y, params.camera.mobileLookAt.z);
 } else {
-  camera.lookAt(0, 0, -1);
+  camera.lookAt(params.camera.lookAt.x, params.camera.lookAt.y, params.camera.lookAt.z);
 }
 
 // Create the text image overlay
@@ -86,13 +106,10 @@ window.addEventListener('resize', () => {
 });
 
 // Variables for movement
+let xRotation = 0; // Initialize xRotation
+let yRotation = 0; // Initialize yRotation
 let targetXRotation = 0;
 let targetYRotation = 0;
-const maxTiltUp = Math.PI / 6; // Maximum angle to tilt up (30 degrees)
-const maxTiltDown = -Math.PI / 18; // Maximum angle to tilt down (10 degrees)
-
-let xRotation = 0;
-let yRotation = 0;
 
 // GSAP Floating Animation for Text
 const floatingOffset = { x: 0, y: 0 };
@@ -113,7 +130,7 @@ window.addEventListener('mousemove', (event) => {
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
   targetXRotation = moveX;
-  targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
+  targetYRotation = Math.max(Math.min(moveY, params.camera.maxTiltUp), params.camera.maxTiltDown);
 });
 
 // Handle touch gestures for sky rotation
@@ -124,17 +141,17 @@ window.addEventListener('touchmove', (event) => {
     const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
 
     targetXRotation = moveX;
-    targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
+    targetYRotation = Math.max(Math.min(moveY, params.camera.maxTiltUp), params.camera.maxTiltDown);
   }
 });
 
 // Handle device orientation for sky rotation
 window.addEventListener('deviceorientation', (event) => {
-  const rotateX = (event.beta - 90) / 90 * (maxTiltUp - maxTiltDown) + maxTiltDown; // Map beta to tilt range
-  const rotateY = (event.gamma / 90) * Math.PI; // Map gamma to horizontal rotation
+  const rotateX = (event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown) + params.camera.maxTiltDown;
+  const rotateY = (event.gamma / 90) * Math.PI;
 
   targetXRotation = rotateY;
-  targetYRotation = Math.max(Math.min(-rotateX, maxTiltUp), maxTiltDown); // Clamp vertical rotation
+  targetYRotation = Math.max(Math.min(-rotateX, params.camera.maxTiltUp), params.camera.maxTiltDown);
 });
 
 // Animation Loop
