@@ -169,8 +169,10 @@ window.addEventListener('deviceorientation', (event) => {
 
 // Animation Loop
 const animate = () => {
-  xRotation = shortestPathRotation(xRotation, targetXRotation);
-  yRotation = lerp(yRotation, targetYRotation, 0.05);
+  const dampingFactor = 0.1; // Damping factor for smoothing
+
+  xRotation = shortestPathRotation(xRotation, targetXRotation) * dampingFactor + xRotation * (1 - dampingFactor);
+  yRotation = yRotation * (1 - dampingFactor) + targetYRotation * dampingFactor;
 
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
