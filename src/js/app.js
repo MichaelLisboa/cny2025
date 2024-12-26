@@ -20,8 +20,7 @@ const params = {
     offset: { x: 1, y: 0 } // Texture offset settings
   },
   sphere: {
-    scaleY: 1.5, // Vertical scale of the sphere
-    scaleX: 2, // Horizontal scale of the sphere
+    scaleY: 2, // Vertical scale of the sphere
     initialRotationX: -Math.PI / 8 // Initial rotation of the sphere (22.5 degrees downward)
   }
 };
@@ -29,7 +28,7 @@ const params = {
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  90,
+  70,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -37,7 +36,7 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer({ alpha: true });
 renderer.outputEncoding = THREE.sRGBEncoding; // Ensure correct color encoding
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 0.35;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 app.appendChild(renderer.domElement);
@@ -163,7 +162,7 @@ window.addEventListener('deviceorientation', (event) => {
   const rotateX = (event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown) + params.camera.maxTiltDown;
   const rotateY = (event.alpha / 180) * Math.PI; // Use alpha for horizontal rotation
 
-  targetXRotation = rotateY;
+  targetXRotation = shortestPathRotation(xRotation, rotateY);
   targetYRotation = Math.max(Math.min(-rotateX, params.camera.maxTiltUp), params.camera.maxTiltDown);
 });
 
@@ -171,8 +170,8 @@ window.addEventListener('deviceorientation', (event) => {
 const animate = () => {
   const dampingFactor = 0.1; // Damping factor for smoothing
 
-  xRotation = shortestPathRotation(xRotation, targetXRotation) * dampingFactor + xRotation * (1 - dampingFactor);
-  yRotation = yRotation * (1 - dampingFactor) + targetYRotation * dampingFactor;
+  xRotation = lerp(xRotation, targetXRotation, dampingFactor);
+  yRotation = lerp(yRotation, targetYRotation, dampingFactor);
 
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;

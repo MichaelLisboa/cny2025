@@ -17,3 +17,12 @@ body, html {
   width: 100vw;
   height: 100vh;
 }
+
+.blur-up {
+  filter: blur(20px);
+  transition: filter 0.5s ease-out;
+}
+
+.blur-up img {
+  filter: none;
+}
