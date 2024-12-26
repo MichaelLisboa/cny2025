@@ -53,13 +53,13 @@ window.addEventListener('resize', () => {
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, 0, 0); // Lower the camera position to simulate standing on the ground
+camera.position.set(0, 0, 0);
 
 if (isMobile) {
-  camera.position.set(0, 0, 0.1); // Slightly move the camera forward on mobile
-  camera.lookAt(0, -100, -200); // Look at the center of the sphere on mobile
+  camera.position.set(0, 0, 0.1);
+  camera.lookAt(0, -100, -200);
 } else {
-  camera.lookAt(0, 0, -1); // Look at the center of the sphere
+  camera.lookAt(0, 0, -1);
 }
 
 // Create the text image overlay
@@ -86,22 +86,22 @@ window.addEventListener('resize', () => {
 });
 
 // Variables for movement
-let targetXRotation = 0; // Target horizontal rotation for the sky
-let targetYRotation = 0; // Target vertical rotation for the sky
+let targetXRotation = 0;
+let targetYRotation = 0;
 const maxTiltUp = Math.PI / 6; // Maximum angle to tilt up (30 degrees)
 const maxTiltDown = -Math.PI / 18; // Maximum angle to tilt down (10 degrees)
 
-let xRotation = 0; // Smoothed horizontal rotation
-let yRotation = 0; // Smoothed vertical rotation
+let xRotation = 0;
+let yRotation = 0;
 
 // GSAP Floating Animation for Text
-const floatingOffset = { x: 0, y: 0 }; // For subtle floating effect
+const floatingOffset = { x: 0, y: 0 };
 const floatingTimeline = gsap.timeline({ repeat: -1, yoyo: true });
 floatingTimeline.to(floatingOffset, {
-  y: gsap.utils.random(20, 50, true), // Randomize vertical movement
-  x: gsap.utils.random(10, 30, true), // Randomize horizontal movement
-  ease: 'sine.inOut', // Smooth easing
-  duration: gsap.utils.random(2, 4, true) // Randomize duration
+  y: gsap.utils.random(20, 50, true),
+  x: gsap.utils.random(10, 30, true),
+  ease: 'sine.inOut',
+  duration: gsap.utils.random(2, 4, true),
 });
 
 // Function to smooth rotations
@@ -109,14 +109,11 @@ const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
 // Handle mouse movement for sky rotation
 window.addEventListener('mousemove', (event) => {
-  const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
+  const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
-  // Clamp vertical rotation
-  targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
-
-  // Update horizontal rotation
   targetXRotation = moveX;
+  targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
 });
 
 // Handle touch gestures for sky rotation
@@ -126,37 +123,28 @@ window.addEventListener('touchmove', (event) => {
     const moveX = (touch.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
     const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
 
-    // Clamp vertical rotation
-    targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
-
-    // Update horizontal rotation
     targetXRotation = moveX;
+    targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
   }
 });
 
 // Handle device orientation for sky rotation
 window.addEventListener('deviceorientation', (event) => {
-  const rotateX = (event.beta / 180) * Math.PI; // Convert beta to radians
-  const rotateY = (event.gamma / 90) * Math.PI; // Convert gamma to radians
+  const rotateX = (event.beta - 90) / 90 * (maxTiltUp - maxTiltDown) + maxTiltDown; // Map beta to tilt range
+  const rotateY = (event.gamma / 90) * Math.PI; // Map gamma to horizontal rotation
 
-  // Clamp vertical rotation
-  targetYRotation = Math.max(Math.min(-rotateX, maxTiltUp), maxTiltDown);
-
-  // Update horizontal rotation
   targetXRotation = rotateY;
+  targetYRotation = Math.max(Math.min(-rotateX, maxTiltUp), maxTiltDown); // Clamp vertical rotation
 });
 
 // Animation Loop
 const animate = () => {
-  // Smooth the rotations using lerp
-  xRotation = lerp(xRotation, targetXRotation, 0.05); // Smooth horizontal rotation
-  yRotation = lerp(yRotation, targetYRotation, 0.05); // Smooth vertical rotation
+  xRotation = lerp(xRotation, targetXRotation, 0.05);
+  yRotation = lerp(yRotation, targetYRotation, 0.05);
 
-  // Rotate the sky
-  skySphere.rotation.y = xRotation; // Rotate horizontally
-  skySphere.rotation.x = yRotation; // Rotate vertically (clamped)
+  skySphere.rotation.y = xRotation;
+  skySphere.rotation.x = yRotation;
 
-  // Move the text image with gentle motion and floating effect
   textImage.style.transform = `translate(calc(-50% + ${floatingOffset.x}px), calc(-50% + ${floatingOffset.y}px))`;
 
   renderer.render(scene, camera);
