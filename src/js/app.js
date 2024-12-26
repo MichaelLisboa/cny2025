@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 
 // Select the app container
 const app = document.getElementById('app');
+const isMobile = window.innerWidth <= 1024;
 
 // Set up Three.js Scene
 const scene = new THREE.Scene();
@@ -52,8 +53,14 @@ window.addEventListener('resize', () => {
 });
 
 // Position the camera inside the sphere
-camera.position.set(0, -250, 0); // Lower the camera position to simulate standing on the ground
-camera.lookAt(0, 0, -500); // Look at the center of the sphere
+camera.position.set(0, 0, 0); // Lower the camera position to simulate standing on the ground
+
+if (isMobile) {
+  camera.position.set(0, 0, 0.1); // Slightly move the camera forward on mobile
+  camera.lookAt(0, -100, -200); // Look at the center of the sphere on mobile
+} else {
+  camera.lookAt(0, 0, -1); // Look at the center of the sphere
+}
 
 // Create the text image overlay
 const textImage = new Image();
