@@ -5,22 +5,6 @@ import { gsap } from 'gsap';
 const app = document.getElementById('app');
 const isMobile = window.innerWidth <= 1024;
 
-// Set up Three.js Scene
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  80,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-const renderer = new THREE.WebGLRenderer({ alpha: true });
-renderer.outputEncoding = THREE.sRGBEncoding; // Ensure correct color encoding
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-app.appendChild(renderer.domElement);
-
 // Parameters for camera positioning, rotation, tilt, and texture settings
 const params = {
   camera: {
@@ -37,9 +21,26 @@ const params = {
   },
   sphere: {
     scaleY: 1.5, // Vertical scale of the sphere
-    scaleX: 2 // Horizontal scale of the sphere
+    scaleX: 2, // Horizontal scale of the sphere
+    initialRotationX: -Math.PI / 12 // Initial rotation of the sphere (15 degrees downward)
   }
 };
+
+// Set up Three.js Scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  80,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.outputEncoding = THREE.sRGBEncoding; // Ensure correct color encoding
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+app.appendChild(renderer.domElement);
 
 // Create a sphere geometry for the 360-degree background
 const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
@@ -61,7 +62,7 @@ const sphereMaterial = new THREE.MeshBasicMaterial({
 
 // Create the sphere mesh
 const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-skySphere.rotation.x = Math.PI / 2; // Rotate sphere to better align with the texture
+skySphere.rotation.x = Math.PI / 2 + params.sphere.initialRotationX; // Rotate sphere to better align with the texture and initial rotation
 skySphere.scale.y = params.sphere.scaleY; // Stretch the vertical height
 scene.add(skySphere);
 
