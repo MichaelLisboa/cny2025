@@ -8,12 +8,12 @@ const isMobile = window.innerWidth <= 1024;
 // Parameters for camera positioning, rotation, tilt, and texture settings
 const params = {
   camera: {
-    position: { x: 0, y: -1.6, z: 0 }, // Camera position (1.6 meters above the ground)
+    position: { x: 0, y: -.5, z: 0 }, // Camera position (1.6 meters above the ground)
     lookAt: { x: 0, y: 0, z: -1 }, // Camera lookAt position
-    mobilePosition: { x: 0, y: -1.6, z: 0.1 }, // Mobile camera position
-    mobileLookAt: { x: 0, y: 0, z: -1 }, // Mobile camera lookAt position
-    maxTiltUp: Math.PI / 4, // Maximum angle to tilt up (45 degrees)
-    maxTiltDown: -Math.PI / 12 // Limit to just slightly below the horizon (15 degrees)
+    mobilePosition: { x: 0, y: -.3, z: 0.1 }, // Mobile camera position
+    mobileLookAt: { x: 0, y: -0.1, z: -1 }, // Mobile camera lookAt position
+    maxTiltUp: Math.PI / 6, // Maximum angle to tilt up (45 degrees)
+    maxTiltDown: -Math.PI / 6 // Limit to just slightly below the horizon (15 degrees)
   },
   texture: {
     repeat: { x: 1, y: 1 }, // Texture repeat settings
@@ -22,14 +22,14 @@ const params = {
   sphere: {
     scaleY: 1.5, // Vertical scale of the sphere
     scaleX: 2, // Horizontal scale of the sphere
-    initialRotationX: -Math.PI / 12 // Initial rotation of the sphere (15 degrees downward)
+    initialRotationX: -Math.PI / 8 // Initial rotation of the sphere (15 degrees downward)
   }
 };
 
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  80,
+  90,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
