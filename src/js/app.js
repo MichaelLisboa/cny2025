@@ -8,12 +8,12 @@ const isMobile = window.innerWidth <= 1024;
 // Parameters for camera positioning, rotation, tilt, and texture settings
 const params = {
   camera: {
-    position: { x: 0, y: -.5, z: 0 }, // Camera position (1.6 meters above the ground)
+    position: { x: 0, y: -0.5, z: 0 }, // Camera position (1.6 meters above the ground)
     lookAt: { x: 0, y: 0, z: -1 }, // Camera lookAt position
-    mobilePosition: { x: 0, y: -.3, z: 0.1 }, // Mobile camera position
+    mobilePosition: { x: 0, y: -0.3, z: 0.1 }, // Mobile camera position
     mobileLookAt: { x: 0, y: -0.1, z: -1 }, // Mobile camera lookAt position
-    maxTiltUp: Math.PI / 6, // Maximum angle to tilt up (45 degrees)
-    maxTiltDown: -Math.PI / 6 // Limit to just slightly below the horizon (15 degrees)
+    maxTiltUp: Math.PI / 6, // Maximum angle to tilt up (30 degrees)
+    maxTiltDown: -Math.PI / 6 // Limit to just slightly below the horizon (30 degrees)
   },
   texture: {
     repeat: { x: 1, y: 1 }, // Texture repeat settings
@@ -22,7 +22,7 @@ const params = {
   sphere: {
     scaleY: 1.5, // Vertical scale of the sphere
     scaleX: 2, // Horizontal scale of the sphere
-    initialRotationX: -Math.PI / 8 // Initial rotation of the sphere (15 degrees downward)
+    initialRotationX: -Math.PI / 8 // Initial rotation of the sphere (22.5 degrees downward)
   }
 };
 
@@ -149,7 +149,7 @@ window.addEventListener('touchmove', (event) => {
 // Handle device orientation for sky rotation
 window.addEventListener('deviceorientation', (event) => {
   const rotateX = (event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown) + params.camera.maxTiltDown;
-  const rotateY = (event.gamma / 90) * Math.PI;
+  const rotateY = (event.alpha / 180) * Math.PI; // Use alpha for horizontal rotation
 
   targetXRotation = rotateY;
   targetYRotation = Math.max(Math.min(-rotateX, params.camera.maxTiltUp), params.camera.maxTiltDown);
