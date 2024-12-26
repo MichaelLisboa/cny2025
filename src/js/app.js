@@ -8,7 +8,7 @@ const isMobile = window.innerWidth <= 1024;
 // Set up Three.js Scene
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  80,
+  60,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -74,11 +74,7 @@ app.appendChild(textImage);
 
 // Function to dynamically adjust text image width
 const adjustTextImageWidth = () => {
-  if (window.innerWidth >= 1024) {
-    textImage.style.width = '30vw'; // Desktop
-  } else {
-    textImage.style.width = '80vw'; // Mobile and tablet
-  }
+  textImage.style.width = window.innerWidth <= 1024 ? '80vw' : '30vw';
 };
 
 // Initial adjustment
@@ -92,7 +88,8 @@ window.addEventListener('resize', () => {
 // Variables for movement
 let targetXRotation = 0; // Target horizontal rotation for the sky
 let targetYRotation = 0; // Target vertical rotation for the sky
-const verticalLimit = Math.PI / 8; // Limit vertical movement to ±22.5 degrees
+const maxTiltUp = Math.PI / 6; // Maximum angle to tilt up (30 degrees)
+const maxTiltDown = -Math.PI / 18; // Maximum angle to tilt down (10 degrees)
 
 let xRotation = 0; // Smoothed horizontal rotation
 let yRotation = 0; // Smoothed vertical rotation
@@ -115,19 +112,25 @@ window.addEventListener('mousemove', (event) => {
   const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
   const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
 
+  // Clamp vertical rotation
+  targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
+
+  // Update horizontal rotation
   targetXRotation = moveX;
-  targetYRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
 });
 
 // Handle touch gestures for sky rotation
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
-    const moveX = (touch.clientX / window.innerWidth - 0.5) * 2 * Math.PI; // Convert to radians
+    const moveX = (touch.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
     const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
 
+    // Clamp vertical rotation
+    targetYRotation = Math.max(Math.min(moveY, maxTiltUp), maxTiltDown);
+
+    // Update horizontal rotation
     targetXRotation = moveX;
-    targetYRotation = Math.max(Math.min(moveY, verticalLimit), -verticalLimit); // Clamp vertical rotation
   }
 });
 
@@ -136,8 +139,11 @@ window.addEventListener('deviceorientation', (event) => {
   const rotateX = (event.beta / 180) * Math.PI; // Convert beta to radians
   const rotateY = (event.gamma / 90) * Math.PI; // Convert gamma to radians
 
+  // Clamp vertical rotation
+  targetYRotation = Math.max(Math.min(-rotateX, maxTiltUp), maxTiltDown);
+
+  // Update horizontal rotation
   targetXRotation = rotateY;
-  targetYRotation = Math.max(Math.min(-rotateX, verticalLimit), -verticalLimit); // Flip and clamp vertical rotation
 });
 
 // Animation Loop
