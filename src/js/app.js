@@ -125,6 +125,18 @@ floatingTimeline.to(floatingOffset, {
 // Function to smooth rotations
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
+// Function to calculate the shortest path rotation
+const shortestPathRotation = (current, target) => {
+  const difference = target - current;
+  if (difference > Math.PI) {
+    return current + (difference - 2 * Math.PI);
+  } else if (difference < -Math.PI) {
+    return current + (difference + 2 * Math.PI);
+  } else {
+    return current + difference;
+  }
+};
+
 // Handle mouse movement for sky rotation
 window.addEventListener('mousemove', (event) => {
   const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
@@ -157,7 +169,7 @@ window.addEventListener('deviceorientation', (event) => {
 
 // Animation Loop
 const animate = () => {
-  xRotation = lerp(xRotation, targetXRotation, 0.05);
+  xRotation = shortestPathRotation(xRotation, targetXRotation);
   yRotation = lerp(yRotation, targetYRotation, 0.05);
 
   skySphere.rotation.y = xRotation;
