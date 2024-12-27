@@ -46,7 +46,7 @@ export const render = () => {
   });
 
   // Floating Animations
-  const textImageOffset = setupFloatingAnimation(textImage, { x: 0, y: 0 }, { minX: 10, maxX: 30, minY: 20, maxY: 50 });
+  const textImageOffset = setupFloatingAnimation(textImage, { x: 0, y: 0 }, { minX: 5, maxX: 15, minY: 10, maxY: 30 });
 
   // Animation Loop
   const animate = () => {

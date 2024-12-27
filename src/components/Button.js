@@ -8,7 +8,7 @@ export const createButton = (container, text = 'Continue', onClick = () => {}) =
     top: '70%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    padding: '12px 32px',
+    padding: '8px 32px', // Adjusted padding for better proportions
     borderRadius: '25px',
     background: 'rgba(255, 239, 200, 0.2)', // Softer warm tone
     boxShadow: '0 0 30px rgba(255, 239, 200, 0.4), 0 0 60px rgba(255, 239, 200, 0.2)', // Softer outer glow
@@ -24,7 +24,7 @@ export const createButton = (container, text = 'Continue', onClick = () => {}) =
   Object.assign(link.style, {
     position: 'relative',
     display: 'inline-block',
-    fontSize: '16px',
+    fontSize: window.innerWidth <= 768 ? '14px' : '16px', // Responsive font size
     fontWeight: '500',
     color: '#ffffff',
     textDecoration: 'none',
@@ -32,6 +32,9 @@ export const createButton = (container, text = 'Continue', onClick = () => {}) =
     zIndex: '2',
     textShadow: '0 2px 10px rgba(255, 255, 255, 0.5)', // Slightly brighter halo
   });
+
+  // Add accessibility label
+  link.setAttribute('aria-label', text);
 
   // Append the link to the wrapper
   wrapper.appendChild(link);
@@ -44,26 +47,32 @@ export const createButton = (container, text = 'Continue', onClick = () => {}) =
 
   // GSAP Glow Animation for the wrapper
   gsap.to(wrapper, {
-    boxShadow: '0 0 50px rgba(255, 239, 200, 0.6), 0 0 100px rgba(255, 239, 200, 0.4)', // Pulsing soft glow
-    scale: 1.05, // Subtle "breathing" effect
-    repeat: -1,
-    yoyo: true,
-    ease: 'sine.inOut',
-    duration: 2,
+    boxShadow: '0 0 40px rgba(255, 239, 200, 0.6), 0 0 120px rgba(255, 239, 200, 0.3)', // Soft outer glow
+    scale: 1.07, // Slightly increased scale for subtle breathing
+    repeat: -1, // Infinite loop
+    yoyo: true, // Back-and-forth animation
+    ease: 'power2.inOut', // Smooth easing for natural transitions
+    duration: 5, // Longer duration for gradual pulsing
   });
 
-  // Add hover interaction for more magic
+  // Add hover interaction for ripple magic
   wrapper.addEventListener('mouseover', () => {
     gsap.to(wrapper, {
-      boxShadow: '0 0 70px rgba(255, 239, 200, 0.8), 0 0 120px rgba(255, 239, 200, 0.5)', // Brighter glow
-      duration: 0.3,
+      boxShadow: '0 0 60px rgba(255, 239, 200, 0.8), 0 0 150px rgba(255, 239, 200, 0.5)', // Bright glow
+      scale: 1.1, // Subtle zoom
+      duration: 0.25, // Smooth transition
+      ease: 'power2.out', // Smooth easing for hover
+      overwrite: true, // Stop the pulsing animation during hover
     });
   });
-
+  
   wrapper.addEventListener('mouseout', () => {
     gsap.to(wrapper, {
-      boxShadow: '0 0 50px rgba(255, 239, 200, 0.6), 0 0 100px rgba(255, 239, 200, 0.4)', // Reset to normal glow
-      duration: 0.3,
+      boxShadow: '0 0 40px rgba(255, 239, 200, 0.6), 0 0 120px rgba(255, 239, 200, 0.3)', // Return to idle glow
+      scale: 1.07, // Reset scale
+      duration: 0.6, // Smooth reset
+      ease: 'power2.inOut', // Match idle animation easing
+      overwrite: true, // Stop hover animation when resetting
     });
   });
 
