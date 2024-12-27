@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { gsap } from 'gsap';
+import './router';
 
 // Select the app container
 const app = document.getElementById('app');
@@ -45,7 +45,7 @@ app.appendChild(renderer.domElement);
 const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
 // Create the texture with adjustments for alignment
 const texture = new THREE.TextureLoader().load(
-  new URL('../assets/images/starry-sky.jpg', import.meta.url).href
+  new URL('../assets/images/starry-sky-background.png', import.meta.url).href
 );
 texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
 texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
@@ -82,44 +82,11 @@ if (isMobile) {
   camera.lookAt(params.camera.lookAt.x, params.camera.lookAt.y, params.camera.lookAt.z);
 }
 
-// Create the text image overlay
-const textImage = new Image();
-textImage.src = new URL('../assets/images/placeholder-text.png', import.meta.url).href;
-textImage.style.position = 'absolute';
-textImage.style.top = '50%'; // Center vertically
-textImage.style.left = '50%'; // Center horizontally
-textImage.style.transform = 'translate(-50%, -50%)';
-textImage.style.willChange = 'transform';
-app.appendChild(textImage);
-
-// Function to dynamically adjust text image width
-const adjustTextImageWidth = () => {
-  textImage.style.width = window.innerWidth <= 1024 ? '80vw' : '30vw';
-};
-
-// Initial adjustment
-adjustTextImageWidth();
-
-// Re-adjust on window resize
-window.addEventListener('resize', () => {
-  adjustTextImageWidth();
-});
-
 // Variables for movement
 let xRotation = 0; // Initialize xRotation
 let yRotation = 0; // Initialize yRotation
 let targetXRotation = 0;
 let targetYRotation = 0;
-
-// GSAP Floating Animation for Text
-const floatingOffset = { x: 0, y: 0 };
-const floatingTimeline = gsap.timeline({ repeat: -1, yoyo: true });
-floatingTimeline.to(floatingOffset, {
-  y: gsap.utils.random(20, 50, true),
-  x: gsap.utils.random(10, 30, true),
-  ease: 'sine.inOut',
-  duration: gsap.utils.random(2, 4, true),
-});
 
 // Function to smooth rotations
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
@@ -175,8 +142,6 @@ const animate = () => {
 
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
-
-  textImage.style.transform = `translate(calc(-50% + ${floatingOffset.x}px), calc(-50% + ${floatingOffset.y}px))`;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
