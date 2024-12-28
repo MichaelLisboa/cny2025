@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../floatingAnimation.js';
 
-export const createCrowdScene = (container, imagePath) => {
+export const createCrowdScene = (container) => {
     // Create the crowd scene container
     const crowdScene = document.createElement('div');
     Object.assign(crowdScene.style, {
@@ -15,9 +15,9 @@ export const createCrowdScene = (container, imagePath) => {
         pointerEvents: 'none', // Ensure no interference with other inputs
     });
 
-    // Create the image
+    // Load the crowd image
     const crowdImage = new Image();
-    crowdImage.src = imagePath;
+    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href; // Dynamic path resolution
     Object.assign(crowdImage.style, {
         width: '150%', // Wider than viewport for parallax
         height: 'auto',

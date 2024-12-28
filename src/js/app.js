@@ -192,9 +192,6 @@ if (isMobile && window.DeviceOrientationEvent) {
   });
 }
 
-// Add the crowd scene
-const crowdScene = createCrowdScene(app, '../../assets/images/crowd-scene.png');
-
 // Animation loop with refined damping and smoothing
 const animate = () => {
   const dampingFactorX = 0.3; // Horizontal damping factor
