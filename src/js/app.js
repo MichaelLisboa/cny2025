@@ -116,7 +116,7 @@ let targetXRotation = 0;
 let targetYRotation = 0;
 
 // Dead zone threshold for reducing shake
-const threshold = 0.075; // Adjust as needed to filter minor shakes
+const threshold = 0.02; // Adjust as needed to filter minor shakes
 
 // Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
