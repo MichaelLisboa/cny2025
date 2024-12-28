@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { createFloatingAnimation } from '../js/floatingAnimation.js';
+import { createFloatingAnimation } from '../floatingAnimation.js';
 
 export const createButton = (container, text = 'Continue', onClick = () => {}, floating = false) => {
   // Create the outer wrapper div for the glowing effect

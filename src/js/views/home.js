@@ -1,4 +1,4 @@
-import { createButton } from '../../components/Button.js';
+import { createButton } from '../components/Button.js';
 import { createFloatingAnimation } from '../floatingAnimation.js';
 
 // Logo image styles

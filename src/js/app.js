@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import './router';
 
+import { createCrowdScene } from './components/crowdScene';
+
 // Select the app container
 const app = document.getElementById('app');
 if (!app) {
@@ -189,6 +191,9 @@ if (isMobile && window.DeviceOrientationEvent) {
     }
   });
 }
+
+// Add the crowd scene
+const crowdScene = createCrowdScene(app, './src/assets/images/crowd-scene.png');
 
 // Animation loop with refined damping and smoothing
 const animate = () => {
