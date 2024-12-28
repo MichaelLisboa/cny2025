@@ -171,37 +171,34 @@ window.addEventListener('touchmove', (event) => {
   }
 });
 
-// Handle device orientation for mobile
-if (isMobile && window.DeviceOrientationEvent) {
-  window.addEventListener('deviceorientation', (event) => {
-    if (event.alpha !== null) {
-      const alpha = (event.alpha / 180) * Math.PI;
+// Define the device orientation handler
+const handleDeviceOrientation = (event) => {
+  if (event.alpha !== null) {
+    const alpha = (event.alpha / 180) * Math.PI;
 
-      // Smooth horizontal rotation (alpha)
-      if (Math.abs(alpha - targetXRotation) > threshold) {
-        targetXRotation = shortestPath(xRotation, alpha);
-      }
-
-      // Smooth vertical rotation (beta)
-      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
-      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
-
-      if (Math.abs(beta - targetYRotation) > threshold) {
-        targetYRotation = Math.max(
-          Math.min(-beta, params.camera.maxTiltUp),
-          params.camera.maxTiltDown
-        );
-      }
+    // Smooth horizontal rotation (alpha)
+    if (Math.abs(alpha - targetXRotation) > threshold) {
+      targetXRotation = shortestPath(xRotation, alpha);
     }
-  });
-}
+
+    // Smooth vertical rotation (beta)
+    const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+    const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+
+    if (Math.abs(beta - targetYRotation) > threshold) {
+      targetYRotation = Math.max(
+        Math.min(-beta, params.camera.maxTiltUp),
+        params.camera.maxTiltDown
+      );
+    }
+  }
+};
 
 // Use the iOS permission handler
-if (OS === 'iOS' && window.DeviceOrientationEvent) {
 requestDeviceOrientation(() => {
-  window.addEventListener('deviceorientation', requestDeviceOrientation);
+  console.log('Adding deviceorientation listener');
+  window.addEventListener('deviceorientation', handleDeviceOrientation);
 });
-}
 
 // Animation loop with refined damping and smoothing
 const animate = () => {
@@ -228,12 +225,12 @@ const animate = () => {
 animate();
 
 // Register the service worker
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
-//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
-//     }, (err) => {
-//       console.log('ServiceWorker registration failed: ', err);
-//     });
-//   });
-// }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, (err) => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
