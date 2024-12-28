@@ -163,16 +163,19 @@ const requestDeviceOrientationPermission = () => {
 // Create permission button for iOS
 if (isIOS) {
   const button = document.createElement('button');
-  button.textContent = 'Enable Motion';
+  button.textContent = 'Tap here to enable motion for your STUPID iOS device';
   Object.assign(button.style, {
     position: 'absolute',
+    width: '80%',
+    height: '80vh',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    padding: '1rem 2rem',
-    fontSize: '1rem',
+    padding: '1rem 1rem',
+    fontSize: '2.75rem',
+    lineHeight: '1.5',
     color: '#fff',
-    backgroundColor: '#333',
+    backgroundColor: 'red',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
