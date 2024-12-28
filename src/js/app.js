@@ -12,6 +12,7 @@ if (!app) {
 createCrowdScene(app);
 
 const isMobile = window.innerWidth <= 1024;
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // Parameters for camera and sphere settings
 const params = {
@@ -112,7 +113,31 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Device orientation permission handling
+// Variables for movement
+let xRotation = 0;
+let yRotation = 0;
+let targetXRotation = 0;
+let targetYRotation = 0;
+
+// Smooth rotations using lerp
+const lerp = (start, end, alpha) => start + (end - start) * alpha;
+
+// Handle device orientation
+const handleDeviceOrientation = (event) => {
+  if (event.alpha !== null) {
+    const alpha = (event.alpha / 180) * Math.PI; // Map alpha to radians
+    const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+    const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+
+    targetXRotation = alpha;
+    targetYRotation = Math.max(
+      Math.min(-beta, params.camera.maxTiltUp),
+      params.camera.maxTiltDown
+    );
+  }
+};
+
+// Device orientation permission handling for iOS
 const requestDeviceOrientationPermission = () => {
   if (
     typeof DeviceOrientationEvent !== 'undefined' &&
@@ -135,7 +160,8 @@ const requestDeviceOrientationPermission = () => {
   }
 };
 
-const createPermissionButton = () => {
+// Create permission button for iOS
+if (isIOS) {
   const button = document.createElement('button');
   button.textContent = 'Enable Motion';
   Object.assign(button.style, {
@@ -150,42 +176,18 @@ const createPermissionButton = () => {
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    zIndex: '1000'
+    zIndex: 1000,
   });
 
   button.addEventListener('click', () => {
     requestDeviceOrientationPermission();
-    button.remove(); // Remove button after permission is requested
+    button.remove();
   });
 
   app.appendChild(button);
-};
-
-// Check if it's iOS
-if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-  createPermissionButton();
 } else {
   window.addEventListener('deviceorientation', handleDeviceOrientation);
 }
-
-// Variables for movement
-let xRotation = 0;
-let yRotation = 0;
-let targetXRotation = 0;
-let targetYRotation = 0;
-
-const handleDeviceOrientation = (event) => {
-  const alpha = (event.alpha / 180) * Math.PI; // Map alpha to radians
-  const beta = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
-  const maxTiltUp = params.camera.maxTiltUp;
-  const maxTiltDown = params.camera.maxTiltDown;
-
-  targetXRotation = alpha;
-  targetYRotation = Math.max(
-    Math.min(-beta * (maxTiltUp - maxTiltDown), maxTiltUp),
-    maxTiltDown
-  );
-};
 
 // Animation loop
 const animate = () => {
