@@ -10,6 +10,48 @@ if (!app) {
   throw new Error('App container is missing.');
 }
 
+const handleDeviceOrientationPermission = async () => {
+  if (
+      typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function'
+  ) {
+      try {
+          const permissionState = await DeviceOrientationEvent.requestPermission();
+          if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleDeviceOrientation);
+          } else {
+              console.warn('Device orientation permission denied.');
+          }
+      } catch (error) {
+          console.error('Error requesting device orientation permission:', error);
+      }
+  } else {
+      // Non-iOS devices or browsers that don't require permission
+      window.addEventListener('deviceorientation', handleDeviceOrientation);
+  }
+};
+
+const handleDeviceOrientation = (event) => {
+  const maxHorizontalShift = settings.isMobile
+      ? settings.parallax.mobile.maxHorizontalShift
+      : settings.parallax.desktop.maxHorizontalShift;
+
+  const xPercent = (event.gamma / 45) * maxHorizontalShift;
+  const yPercent = 0; // Vertical movement disabled, per your requirements
+
+  parallaxX = xPercent;
+  parallaxY = 0;
+
+  updateParallax(parallaxX, parallaxY);
+};
+
+// Call this when initializing
+if (/Mobi|iPad|iPhone/i.test(navigator.userAgent)) {
+  handleDeviceOrientationPermission();
+} else {
+  window.addEventListener('deviceorientation', handleDeviceOrientation);
+}
+
 createCrowdScene(app);
 
 const isMobile = window.innerWidth <= 1024;
