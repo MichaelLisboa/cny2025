@@ -36,7 +36,7 @@ export const createCrowdScene = (container) => {
     const crowdScene = document.createElement('div');
     Object.assign(crowdScene.style, {
         position: 'absolute',
-        bottom: '0',
+        bottom: isMobile ? settings.image.mobileBottom : settings.image.desktopBottom,
         left: '0',
         width: '100vw',
         height: '100vh',

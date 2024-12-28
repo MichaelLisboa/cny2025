@@ -5,10 +5,9 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
   // Create the outer wrapper div for the glowing effect
   const wrapper = document.createElement('div');
   Object.assign(wrapper.style, {
-    position: 'absolute',
-    top: '70%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
+    position: 'relative', // Change to relative for flexibility
+    margin: '0 auto', // Ensure horizontal centering within parent
+    display: 'inline-block', // Ensure proper centering for inline content
     padding: '8px 32px',
     borderRadius: '25px',
     background: 'rgba(255, 239, 200, 0.2)',
@@ -25,7 +24,7 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
   Object.assign(link.style, {
     position: 'relative',
     display: 'inline-block',
-    fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+    fontSize: window.innerWidth <= 768 ? '20px' : '32px',
     fontWeight: '500',
     color: '#ffffff',
     textDecoration: 'none',

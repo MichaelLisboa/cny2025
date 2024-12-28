@@ -35,6 +35,34 @@ div {
   user-select: none; /* Prevent text selection */
 }
 
+p.text-medium {
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+p.text-large {
+  font-size: 1.5rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 1024px) {
+  p.text-medium {
+    font-size: 1.5rem;
+  }
+  p.text-large {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  p.text-medium {
+    font-size: 2.5rem;
+  }
+  p.text-large {
+    font-size: 3.5rem;
+  }
+}
+
 .blur-up {
   filter: blur(20px);
   transition: filter 0.5s ease-out;
