@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import './router';
 import { requestDeviceOrientation } from './handleIosPermissions';
-
 import { createCrowdScene } from './components/crowdScene';
+import getDeviceInfo from './deviceUtils';
 
 // Select the app container
 const app = document.getElementById('app');
@@ -13,7 +13,8 @@ if (!app) {
 
 createCrowdScene(app);
 
-const isMobile = window.innerWidth <= 1024;
+const { isMobile, OS, deviceType } = getDeviceInfo();
+console.log(`Device Info: isMobile=${isMobile}, OS=${OS}, deviceType=${deviceType}`);
 
 // Parameters for camera and sphere settings
 const params = {
@@ -196,9 +197,11 @@ if (isMobile && window.DeviceOrientationEvent) {
 }
 
 // Use the iOS permission handler
+if (OS === 'iOS' && window.DeviceOrientationEvent) {
 requestDeviceOrientation(() => {
   window.addEventListener('deviceorientation', requestDeviceOrientation);
 });
+}
 
 // Animation loop with refined damping and smoothing
 const animate = () => {

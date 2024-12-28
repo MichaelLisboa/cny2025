@@ -44,6 +44,7 @@ export const AppModal = ({ title, description, actions }) => {
     fontSize: '1.25rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
+    marginTop: '0',
     color: '#333',
   });
 
@@ -51,7 +52,8 @@ export const AppModal = ({ title, description, actions }) => {
   const modalDescription = document.createElement('p');
   modalDescription.textContent = description;
   Object.assign(modalDescription.style, {
-    fontSize: '0.9rem',
+    fontSize: '1rem',
+    fontWeight: "600",
     color: '#555',
     marginBottom: '1.5rem',
   });
@@ -72,6 +74,7 @@ export const AppModal = ({ title, description, actions }) => {
       fontSize: '1rem',
       fontWeight: 'bold',
       textDecoration: 'none',
+      color: 'rgba(0, 122, 255, 1)',
       cursor: 'pointer',
       ...style, // Allow for custom styling
     });

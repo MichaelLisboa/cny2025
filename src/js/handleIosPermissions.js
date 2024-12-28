@@ -1,3 +1,4 @@
+import { Color } from 'three/src/Three.Core.js';
 import { AppModal } from './AppModal.js';
 
 export const requestDeviceOrientation = (onPermissionGranted) => {
@@ -37,12 +38,12 @@ export const requestDeviceOrientation = (onPermissionGranted) => {
       description: 'Would you like to enable motion functionality for better interaction?',
       actions: [
         {
-          text: 'No, thanks',
-          style: { fontWeight: 'normal' },
+          text: 'No, I\'m a loser',
+          style: { fontWeight: 'normal', color: 'rgba(0, 122, 255, 1)' },
           onClick: () => console.log('Cancelled'),
         },
         {
-          text: 'Yes, do it',
+          text: 'Yes, I effin\' rule!',
           onClick: () => {
             console.log('Yes clicked. Calling requestPermission().'); // Debugging log
             requestPermission();
