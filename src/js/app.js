@@ -193,7 +193,7 @@ if (isMobile && window.DeviceOrientationEvent) {
 }
 
 // Add the crowd scene
-const crowdScene = createCrowdScene(app, './src/assets/images/crowd-scene.png');
+const crowdScene = createCrowdScene(app, '../../assets/images/crowd-scene.png');
 
 // Animation loop with refined damping and smoothing
 const animate = () => {
