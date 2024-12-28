@@ -21,7 +21,7 @@ export const createNavBar = () => {
         justifyContent: "space-around",
         width: "90%",
         maxWidth: "640px",
-        gap: "8px",
+        gap: "0px",
     });
 
     const leftLink = document.createElement("a");
@@ -30,6 +30,7 @@ export const createNavBar = () => {
         fontSize: "clamp(14px, 2vw, 18px)", // Responsive text size
         fontWeight: "bold",
         color: "#fff",
+        textAlign: "right",
         textDecoration: "none",
     });
 
