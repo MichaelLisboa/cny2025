@@ -8,10 +8,10 @@ export const createCrowdScene = (container, imagePath) => {
         position: 'absolute',
         bottom: '0',
         left: '0',
-        width: '100%',
-        height: '100vh', // Match the viewport height
+        width: '100vw', // Full viewport width
+        height: '100vh', // Match viewport height
         overflow: 'hidden',
-        zIndex: '2',
+        zIndex: '0',
         pointerEvents: 'none', // Ensure no interference with other inputs
     });
 
@@ -19,10 +19,11 @@ export const createCrowdScene = (container, imagePath) => {
     const crowdImage = new Image();
     crowdImage.src = imagePath;
     Object.assign(crowdImage.style, {
-        width: '120%', // Make the image larger than the viewport for parallax
+        width: '150%', // Wider than viewport for parallax
         height: 'auto',
         position: 'absolute',
         bottom: '0', // Stick to the bottom
+        left: '-25%', // Center the image horizontally
         transformOrigin: 'center bottom',
     });
 
@@ -33,24 +34,23 @@ export const createCrowdScene = (container, imagePath) => {
     let parallaxX = 0;
     let parallaxY = 0;
 
-    // Parallax effect using GSAP
-    const updateParallax = (xOffset, yOffset) => {
+    // Update parallax using GSAP
+    const updateParallax = (xPercent, yPercent) => {
         gsap.to(crowdImage, {
-            x: `${xOffset}px`, // Horizontal movement
-            y: `${yOffset}px`, // Vertical movement
-            ease: 'power2.out', // Smooth easing
-            duration: 0.6, // Smooth transition duration
+            x: `${xPercent}px`, // Horizontal shift in pixels
+            y: `${yPercent}px`, // Vertical shift in pixels
+            ease: 'power2.out',
+            duration: 0.6, // Smooth transition
         });
     };
 
-    // Input handling for parallax
+    // Input handling for mouse movement (desktop)
     const handleMouseMove = (event) => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // Calculate offset in pixels for horizontal and vertical movement
-        const xOffset = ((event.clientX / viewportWidth) - 0.5) * (viewportWidth * 0.05); // Horizontal shift
-        const yOffset = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * 50, 0), -20); // Vertical shift
+        const xOffset = ((event.clientX / viewportWidth) - 0.5) * 50; // Up to ±50px horizontal
+        const yOffset = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * 30, 0), -15); // Vertical shift range
 
         parallaxX = xOffset;
         parallaxY = yOffset;
@@ -58,9 +58,10 @@ export const createCrowdScene = (container, imagePath) => {
         updateParallax(parallaxX, parallaxY);
     };
 
+    // Input handling for device orientation (mobile)
     const handleDeviceOrientation = (event) => {
-        const xOffset = (event.gamma / 45) * (window.innerWidth * 0.05); // Map tilt left/right to horizontal shift
-        const yOffset = Math.max(Math.min((event.beta / 90) * -30, 0), -20); // Map tilt up/down to vertical shift
+        const xOffset = (event.gamma / 45) * 25; // Map tilt left/right to horizontal shift
+        const yOffset = Math.max(Math.min((event.beta / 90) * -30, 0), -15); // Map tilt up/down to vertical shift
 
         parallaxX = xOffset;
         parallaxY = yOffset;
@@ -68,19 +69,19 @@ export const createCrowdScene = (container, imagePath) => {
         updateParallax(parallaxX, parallaxY);
     };
 
-    // Add listeners based on device type
-    if (window.DeviceOrientationEvent) {
+    // Add event listeners
+    if (window.DeviceOrientationEvent && /Mobi/i.test(navigator.userAgent)) {
         window.addEventListener('deviceorientation', handleDeviceOrientation);
     } else {
         window.addEventListener('mousemove', handleMouseMove);
     }
 
-    // Optional floating animation for subtle randomness
+    // Optional floating animation for subtle motion
     const floatingAnimation = createFloatingAnimation({
-        minX: -2,
-        maxX: 2,
+        minX: -1,
+        maxX: 1,
         minY: 0,
-        maxY: 2,
+        maxY: 1,
     });
     floatingAnimation(crowdScene);
 
