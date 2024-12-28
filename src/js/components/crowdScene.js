@@ -17,20 +17,27 @@ export const createCrowdScene = (container) => {
 
     // Load the crowd image
     const crowdImage = new Image();
-    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href; // Dynamic path
+    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href;
+
+    // Adjust styles based on screen size
+    const isMobile = window.innerWidth <= 768; // Mobile breakpoint
     Object.assign(crowdImage.style, {
-        width: '200%', // Extra-wide for horizontal parallax
+        width: isMobile ? '300%' : '150%', // Larger on mobile, smaller on desktop
         height: 'auto',
         position: 'absolute',
-        bottom: '0', // Stick to the bottom
-        left: '-50%', // Center the image horizontally
+        bottom: isMobile ? '0' : '-1%', // Raise image slightly higher on mobile
+        left: isMobile ? '-50%' : '-25%', // Centered for mobile, slight offset for desktop
         transformOrigin: 'center bottom',
     });
 
     crowdScene.appendChild(crowdImage);
     container.appendChild(crowdScene);
 
-    // Parallax effect using GSAP
+    // Initialize GSAP animation state
+    let parallaxX = 0;
+    let parallaxY = 0;
+
+    // Update parallax using GSAP
     const updateParallax = (xPercent, yPercent) => {
         gsap.to(crowdImage, {
             x: `${xPercent}%`, // Horizontal parallax
@@ -45,17 +52,23 @@ export const createCrowdScene = (container) => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const xPercent = ((event.clientX / viewportWidth) - 0.5) * 30; // Horizontal shift up to ±30%
-        const yPercent = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * 20, 0), -10); // Vertical shift within bounds
+        const xPercent = ((event.clientX / viewportWidth) - 0.5) * (isMobile ? 50 : 30); // Wider shift on mobile
+        const yPercent = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * (isMobile ? 25 : 15), 0), -10); // Adjusted vertical shift
 
-        updateParallax(xPercent, yPercent);
+        parallaxX = xPercent;
+        parallaxY = yPercent;
+
+        updateParallax(parallaxX, parallaxY);
     };
 
     const handleDeviceOrientation = (event) => {
-        const xPercent = (event.gamma / 45) * 15; // Map tilt left/right to horizontal parallax
-        const yPercent = Math.max(Math.min((event.beta / 90) * -15, 0), -10); // Map tilt up/down to vertical parallax
+        const xPercent = (event.gamma / 45) * (isMobile ? 20 : 15); // Responsive horizontal parallax
+        const yPercent = Math.max(Math.min((event.beta / 90) * (isMobile ? -20 : -15), 0), -10); // Responsive vertical parallax
 
-        updateParallax(xPercent, yPercent);
+        parallaxX = xPercent;
+        parallaxY = yPercent;
+
+        updateParallax(parallaxX, parallaxY);
     };
 
     // Add event listeners for device type
@@ -65,7 +78,7 @@ export const createCrowdScene = (container) => {
         window.addEventListener('mousemove', handleMouseMove);
     }
 
-    // Optional floating animation
+    // Floating animation for subtle motion
     const floatingAnimation = createFloatingAnimation({
         minX: -1,
         maxX: 1,
