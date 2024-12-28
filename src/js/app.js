@@ -3,6 +3,7 @@ import './router';
 import { requestDeviceOrientation } from './handleIosPermissions';
 import { createCrowdScene } from './components/crowdScene';
 import getDeviceInfo from './deviceUtils';
+import { createNavBar } from './components/NavBar.js';
 
 // Select the app container
 const app = document.getElementById('app');
@@ -11,6 +12,7 @@ if (!app) {
   throw new Error('App container is missing.');
 }
 
+createNavBar(app)
 createCrowdScene(app);
 
 const { isMobile, OS, deviceType } = getDeviceInfo();
@@ -225,12 +227,12 @@ const animate = () => {
 animate();
 
 // Register the service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, (err) => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
+//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+//     }, (err) => {
+//       console.log('ServiceWorker registration failed: ', err);
+//     });
+//   });
+// }
