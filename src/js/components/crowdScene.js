@@ -10,78 +10,67 @@ export const createCrowdScene = (container) => {
         left: '0',
         width: '100vw', // Full viewport width
         height: '100vh', // Match viewport height
-        // overflow: 'hidden',
+        overflow: 'hidden',
         zIndex: '0',
-        pointerEvents: 'none', // Ensure no interference with other inputs
+        pointerEvents: 'none', // Prevent interactions
     });
 
     // Load the crowd image
     const crowdImage = new Image();
-    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href; // Dynamic path resolution
+    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href; // Dynamic path
     Object.assign(crowdImage.style, {
-        width: '150%', // Wider than viewport for parallax
+        width: '200%', // Extra-wide for horizontal parallax
         height: 'auto',
         position: 'absolute',
-        bottom: '-1%', // Stick to the bottom
-        left: '-25%', // Center the image horizontally
+        bottom: '0', // Stick to the bottom
+        left: '-50%', // Center the image horizontally
         transformOrigin: 'center bottom',
     });
 
     crowdScene.appendChild(crowdImage);
     container.appendChild(crowdScene);
 
-    // Initialize GSAP animation state
-    let parallaxX = 0;
-    let parallaxY = 0;
-
-    // Update parallax using GSAP
+    // Parallax effect using GSAP
     const updateParallax = (xPercent, yPercent) => {
         gsap.to(crowdImage, {
-            x: `${xPercent}px`, // Horizontal shift in pixels
-            y: `${yPercent}px`, // Vertical shift in pixels
+            x: `${xPercent}%`, // Horizontal parallax
+            y: `${yPercent}px`, // Vertical parallax
             ease: 'power2.out',
-            duration: 0.6, // Smooth transition
+            duration: 0.6,
         });
     };
 
-    // Input handling for mouse movement (desktop)
+    // Input handling for parallax (mouse or device tilt)
     const handleMouseMove = (event) => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const xOffset = ((event.clientX / viewportWidth) - 0.5) * 50; // Up to ±50px horizontal
-        const yOffset = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * 30, 0), -15); // Vertical shift range
+        const xPercent = ((event.clientX / viewportWidth) - 0.5) * 30; // Horizontal shift up to ±30%
+        const yPercent = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * 20, 0), -10); // Vertical shift within bounds
 
-        parallaxX = xOffset;
-        parallaxY = yOffset;
-
-        updateParallax(parallaxX, parallaxY);
+        updateParallax(xPercent, yPercent);
     };
 
-    // Input handling for device orientation (mobile)
     const handleDeviceOrientation = (event) => {
-        const xOffset = (event.gamma / 45) * 25; // Map tilt left/right to horizontal shift
-        const yOffset = Math.max(Math.min((event.beta / 90) * -30, 0), -15); // Map tilt up/down to vertical shift
+        const xPercent = (event.gamma / 45) * 15; // Map tilt left/right to horizontal parallax
+        const yPercent = Math.max(Math.min((event.beta / 90) * -15, 0), -10); // Map tilt up/down to vertical parallax
 
-        parallaxX = xOffset;
-        parallaxY = yOffset;
-
-        updateParallax(parallaxX, parallaxY);
+        updateParallax(xPercent, yPercent);
     };
 
-    // Add event listeners
+    // Add event listeners for device type
     if (window.DeviceOrientationEvent && /Mobi/i.test(navigator.userAgent)) {
         window.addEventListener('deviceorientation', handleDeviceOrientation);
     } else {
         window.addEventListener('mousemove', handleMouseMove);
     }
 
-    // Optional floating animation for subtle motion
+    // Optional floating animation
     const floatingAnimation = createFloatingAnimation({
-        minX: -5,
-        maxX: 5,
-        minY: -10,
-        maxY: 10,
+        minX: -1,
+        maxX: 1,
+        minY: 0,
+        maxY: 1,
     });
     floatingAnimation(crowdScene);
 
