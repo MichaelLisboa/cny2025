@@ -130,28 +130,41 @@ const throttle = (func, limit) => {
   };
 };
 
-// Handle mouse and touch input
-const handleInput = (clientX, clientY) => {
-  const moveX = (clientX / window.innerWidth - 0.5) * 2 * Math.PI;
-  const moveY = (clientY / window.innerHeight - 0.5) * Math.PI;
+// Handle device orientation for mobile
+if (isMobile && window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', (event) => {
+    if (event.alpha !== null) {
+      targetXRotation = (event.alpha / 180) * Math.PI; // Horizontal rotation
+      targetYRotation = Math.max(
+        Math.min(-(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown), params.camera.maxTiltUp),
+        params.camera.maxTiltDown
+      );
+    }
+  });
+} else {
+  // Fallback for desktop: Handle mouse and touch input
+  const handleInput = (clientX, clientY) => {
+    const moveX = (clientX / window.innerWidth - 0.5) * 2 * Math.PI;
+    const moveY = (clientY / window.innerHeight - 0.5) * Math.PI;
 
-  targetXRotation = moveX;
-  targetYRotation = Math.max(
-    Math.min(moveY, params.camera.maxTiltUp),
-    params.camera.maxTiltDown
-  );
-};
+    targetXRotation = moveX;
+    targetYRotation = Math.max(
+      Math.min(moveY, params.camera.maxTiltUp),
+      params.camera.maxTiltDown
+    );
+  };
 
-window.addEventListener('mousemove', throttle((event) => {
-  handleInput(event.clientX, event.clientY);
-}, 50));
+  window.addEventListener('mousemove', throttle((event) => {
+    handleInput(event.clientX, event.clientY);
+  }, 50));
 
-window.addEventListener('touchmove', throttle((event) => {
-  if (event.touches.length === 1) {
-    const touch = event.touches[0];
-    handleInput(touch.clientX, touch.clientY);
-  }
-}, 50));
+  window.addEventListener('touchmove', throttle((event) => {
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      handleInput(touch.clientX, touch.clientY);
+    }
+  }, 50));
+}
 
 // Animation loop
 const animate = () => {
