@@ -134,7 +134,7 @@ if (isMobile && window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', (event) => {
     if (event.alpha !== null) {
       const alpha = (event.alpha / 180) * Math.PI;
-      targetXRotation = shortestPath(xRotation, alpha); // Smooth transition across 360° boundary
+      targetXRotation = shortestPath(xRotation, alpha);
       targetYRotation = Math.max(
         Math.min(-(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown), params.camera.maxTiltUp),
         params.camera.maxTiltDown
@@ -143,7 +143,7 @@ if (isMobile && window.DeviceOrientationEvent) {
   });
 }
 
-// Fallback for desktop: Handle mouse and touch input
+// Handle mouse and touch input
 let lastTouchX = 0;
 let lastTouchY = 0;
 
@@ -155,14 +155,16 @@ const handleInput = (deltaX, deltaY) => {
   );
 };
 
+// Mouse input
 window.addEventListener('mousemove', (event) => {
   if (!isMobile) {
-    const deltaX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-    const deltaY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    const deltaX = event.movementX || 0;
+    const deltaY = event.movementY || 0;
     handleInput(deltaX, deltaY);
   }
 });
 
+// Touch input
 window.addEventListener('touchmove', (event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
@@ -176,7 +178,7 @@ window.addEventListener('touchmove', (event) => {
 
 // Animation loop
 const animate = () => {
-  const dampingFactor = isMobile ? 0.15 : 0.1;
+  const dampingFactor = 0.15;
 
   xRotation = lerp(xRotation, targetXRotation, dampingFactor);
   yRotation = lerp(yRotation, targetYRotation, dampingFactor);
