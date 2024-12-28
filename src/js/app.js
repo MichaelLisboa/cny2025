@@ -10,55 +10,6 @@ if (!app) {
   throw new Error('App container is missing.');
 }
 
-// Handle device orientation permission for iOS
-const handleDeviceOrientationPermission = async () => {
-  if (
-    typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof DeviceOrientationEvent.requestPermission === 'function'
-  ) {
-    try {
-      const permissionState = await DeviceOrientationEvent.requestPermission();
-      if (permissionState === 'granted') {
-        window.addEventListener('deviceorientation', handleDeviceOrientation);
-      } else {
-        console.warn('Device orientation permission denied.');
-      }
-    } catch (error) {
-      console.error('Error requesting device orientation permission:', error);
-    }
-  } else {
-    // Non-iOS devices or browsers that don't require permission
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-  }
-};
-
-// Handle device orientation events
-const handleDeviceOrientation = (event) => {
-  if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
-    const maxHorizontalShift = isMobile
-      ? settings.parallax.mobile.maxHorizontalShift
-      : settings.parallax.desktop.maxHorizontalShift;
-
-    const xPercent = (event.gamma / 45) * maxHorizontalShift;
-    const yPercent = 0; // Vertical movement disabled per your requirements
-
-    parallaxX = xPercent;
-    parallaxY = 0;
-
-    updateParallax(parallaxX, parallaxY);
-  }
-};
-
-// Call permission handler for mobile devices
-if (/Mobi|iPad|iPhone/i.test(navigator.userAgent)) {
-  document.body.addEventListener('click', () => {
-    handleDeviceOrientationPermission();
-  });
-} else {
-  window.addEventListener('deviceorientation', handleDeviceOrientation);
-}
-
-// Create the crowd scene
 createCrowdScene(app);
 
 const isMobile = window.innerWidth <= 1024;
@@ -218,18 +169,47 @@ window.addEventListener('touchmove', (event) => {
   }
 });
 
-// Animation loop
+// Handle device orientation for mobile
+if (isMobile && window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', (event) => {
+    if (event.alpha !== null) {
+      const alpha = (event.alpha / 180) * Math.PI;
+
+      // Smooth horizontal rotation (alpha)
+      if (Math.abs(alpha - targetXRotation) > threshold) {
+        targetXRotation = shortestPath(xRotation, alpha);
+      }
+
+      // Smooth vertical rotation (beta)
+      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+
+      if (Math.abs(beta - targetYRotation) > threshold) {
+        targetYRotation = Math.max(
+          Math.min(-beta, params.camera.maxTiltUp),
+          params.camera.maxTiltDown
+        );
+      }
+    }
+  });
+}
+
+// Animation loop with refined damping and smoothing
 const animate = () => {
   const dampingFactorX = 0.3; // Horizontal damping factor
-  const dampingFactorY = 0.15; // Vertical damping factor
+  const dampingFactorY = 0.15; // Vertical damping factor (even smoother for vertical motions)
 
+  // Smoothly transition rotations
   xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
+
+  // Apply low-pass filtering to reduce jitter in yRotation
   const smoothY = yRotation + (targetYRotation - yRotation) * dampingFactorY;
   yRotation = Math.max(
     Math.min(smoothY, params.camera.maxTiltUp),
     params.camera.maxTiltDown
   );
 
+  // Apply rotations to the sphere
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
 
@@ -237,3 +217,14 @@ const animate = () => {
   requestAnimationFrame(animate);
 };
 animate();
+
+// Register the service worker
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
+//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+//     }, (err) => {
+//       console.log('ServiceWorker registration failed: ', err);
+//     });
+//   });
+// }
