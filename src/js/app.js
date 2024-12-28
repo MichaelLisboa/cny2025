@@ -10,6 +10,8 @@ if (!app) {
   throw new Error('App container is missing.');
 }
 
+createCrowdScene(app);
+
 const isMobile = window.innerWidth <= 1024;
 
 // Parameters for camera and sphere settings

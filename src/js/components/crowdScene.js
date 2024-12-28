@@ -10,7 +10,7 @@ export const createCrowdScene = (container) => {
         left: '0',
         width: '100vw', // Full viewport width
         height: '100vh', // Match viewport height
-        overflow: 'hidden',
+        // overflow: 'hidden',
         zIndex: '0',
         pointerEvents: 'none', // Ensure no interference with other inputs
     });
@@ -22,7 +22,7 @@ export const createCrowdScene = (container) => {
         width: '150%', // Wider than viewport for parallax
         height: 'auto',
         position: 'absolute',
-        bottom: '0', // Stick to the bottom
+        bottom: '-1%', // Stick to the bottom
         left: '-25%', // Center the image horizontally
         transformOrigin: 'center bottom',
     });
@@ -78,10 +78,10 @@ export const createCrowdScene = (container) => {
 
     // Optional floating animation for subtle motion
     const floatingAnimation = createFloatingAnimation({
-        minX: -1,
-        maxX: 1,
-        minY: 0,
-        maxY: 1,
+        minX: -5,
+        maxX: 5,
+        minY: -10,
+        maxY: 10,
     });
     floatingAnimation(crowdScene);
 
