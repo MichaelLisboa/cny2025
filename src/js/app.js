@@ -118,53 +118,61 @@ let targetYRotation = 0;
 // Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
-// Throttle function for input
-const throttle = (func, limit) => {
-  let inThrottle;
-  return (...args) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
+// Calculate the shortest rotation path
+const shortestPath = (current, target) => {
+  const delta = target - current;
+  if (delta > Math.PI) {
+    return current + (delta - 2 * Math.PI);
+  } else if (delta < -Math.PI) {
+    return current + (delta + 2 * Math.PI);
+  }
+  return target;
 };
 
 // Handle device orientation for mobile
 if (isMobile && window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', (event) => {
     if (event.alpha !== null) {
-      targetXRotation = (event.alpha / 180) * Math.PI; // Horizontal rotation
+      const alpha = (event.alpha / 180) * Math.PI;
+      targetXRotation = shortestPath(xRotation, alpha); // Smooth transition across 360° boundary
       targetYRotation = Math.max(
         Math.min(-(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown), params.camera.maxTiltUp),
         params.camera.maxTiltDown
       );
     }
   });
-} else {
-  // Fallback for desktop: Handle mouse and touch input
-  const handleInput = (clientX, clientY) => {
-    const moveX = (clientX / window.innerWidth - 0.5) * 2 * Math.PI;
-    const moveY = (clientY / window.innerHeight - 0.5) * Math.PI;
-
-    targetXRotation = moveX;
-    targetYRotation = Math.max(
-      Math.min(moveY, params.camera.maxTiltUp),
-      params.camera.maxTiltDown
-    );
-  };
-
-  window.addEventListener('mousemove', throttle((event) => {
-    handleInput(event.clientX, event.clientY);
-  }, 50));
-
-  window.addEventListener('touchmove', throttle((event) => {
-    if (event.touches.length === 1) {
-      const touch = event.touches[0];
-      handleInput(touch.clientX, touch.clientY);
-    }
-  }, 50));
 }
+
+// Fallback for desktop: Handle mouse and touch input
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+const handleInput = (deltaX, deltaY) => {
+  targetXRotation += deltaX * 0.005; // Adjust sensitivity
+  targetYRotation = Math.max(
+    Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
+    params.camera.maxTiltDown
+  );
+};
+
+window.addEventListener('mousemove', (event) => {
+  if (!isMobile) {
+    const deltaX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+    const deltaY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    handleInput(deltaX, deltaY);
+  }
+});
+
+window.addEventListener('touchmove', (event) => {
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - lastTouchX;
+    const deltaY = touch.clientY - lastTouchY;
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+    handleInput(deltaX, deltaY);
+  }
+});
 
 // Animation loop
 const animate = () => {
