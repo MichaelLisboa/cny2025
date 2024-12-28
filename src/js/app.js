@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import './router';
+import { requestDeviceOrientation } from './handleIosPermissions';
+
 import { createCrowdScene } from './components/crowdScene';
 
 // Select the app container
@@ -12,7 +14,6 @@ if (!app) {
 createCrowdScene(app);
 
 const isMobile = window.innerWidth <= 1024;
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 // Parameters for camera and sphere settings
 const params = {
@@ -119,85 +120,102 @@ let yRotation = 0;
 let targetXRotation = 0;
 let targetYRotation = 0;
 
+// Dead zone threshold for reducing shake
+const threshold = 0.02; // Adjust as needed to filter minor shakes
+
 // Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
-// Handle device orientation
-const handleDeviceOrientation = (event) => {
-  if (event.alpha !== null) {
-    const alpha = (event.alpha / 180) * Math.PI; // Map alpha to radians
-    const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
-    const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
-
-    targetXRotation = alpha;
-    targetYRotation = Math.max(
-      Math.min(-beta, params.camera.maxTiltUp),
-      params.camera.maxTiltDown
-    );
+// Calculate the shortest rotation path
+const shortestPath = (current, target) => {
+  const delta = target - current;
+  if (delta > Math.PI) {
+    return current + (delta - 2 * Math.PI);
+  } else if (delta < -Math.PI) {
+    return current + (delta + 2 * Math.PI);
   }
+  return target;
 };
 
-// Device orientation permission handling for iOS
-const requestDeviceOrientationPermission = () => {
-  if (
-    typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof DeviceOrientationEvent.requestPermission === 'function'
-  ) {
-    DeviceOrientationEvent.requestPermission()
-      .then((response) => {
-        if (response === 'granted') {
-          window.addEventListener('deviceorientation', handleDeviceOrientation);
-        } else {
-          console.warn('Device orientation permission denied.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error requesting device orientation permission:', error);
-      });
-  } else {
-    console.warn('DeviceOrientationEvent.requestPermission() is not supported.');
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-  }
+// Handle mouse and touch input
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+const handleInput = (deltaX, deltaY) => {
+  targetXRotation += deltaX * 0.005; // Adjust sensitivity
+  targetYRotation = Math.max(
+    Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
+    params.camera.maxTiltDown
+  );
 };
 
-// Create permission button for iOS
-if (isIOS) {
-  const button = document.createElement('button');
-  button.textContent = 'Tap here to enable motion for your STUPID iOS device';
-  Object.assign(button.style, {
-    position: 'absolute',
-    width: '80%',
-    height: '80vh',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    padding: '1rem 1rem',
-    fontSize: '2.75rem',
-    lineHeight: '1.5',
-    color: '#fff',
-    backgroundColor: 'red',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    zIndex: 1000,
-  });
+// Mouse input
+window.addEventListener('mousemove', (event) => {
+  if (!isMobile) {
+    const deltaX = event.movementX || 0;
+    const deltaY = event.movementY || 0;
+    handleInput(deltaX, deltaY);
+  }
+});
 
-  button.addEventListener('click', () => {
-    requestDeviceOrientationPermission();
-    button.remove();
-  });
+// Touch input
+window.addEventListener('touchmove', (event) => {
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - lastTouchX;
+    const deltaY = touch.clientY - lastTouchY;
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+    handleInput(deltaX, deltaY);
+  }
+});
 
-  app.appendChild(button);
-} else {
-  window.addEventListener('deviceorientation', handleDeviceOrientation);
+// Handle device orientation for mobile
+if (isMobile && window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', (event) => {
+    if (event.alpha !== null) {
+      const alpha = (event.alpha / 180) * Math.PI;
+
+      // Smooth horizontal rotation (alpha)
+      if (Math.abs(alpha - targetXRotation) > threshold) {
+        targetXRotation = shortestPath(xRotation, alpha);
+      }
+
+      // Smooth vertical rotation (beta)
+      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+
+      if (Math.abs(beta - targetYRotation) > threshold) {
+        targetYRotation = Math.max(
+          Math.min(-beta, params.camera.maxTiltUp),
+          params.camera.maxTiltDown
+        );
+      }
+    }
+  });
 }
 
-// Animation loop
-const animate = () => {
-  const dampingFactor = 0.1;
-  xRotation += (targetXRotation - xRotation) * dampingFactor;
-  yRotation += (targetYRotation - yRotation) * dampingFactor;
+// Use the iOS permission handler
+requestDeviceOrientation(() => {
+  window.addEventListener('deviceorientation', requestDeviceOrientation);
+});
 
+// Animation loop with refined damping and smoothing
+const animate = () => {
+  const dampingFactorX = 0.3; // Horizontal damping factor
+  const dampingFactorY = 0.15; // Vertical damping factor (even smoother for vertical motions)
+
+  // Smoothly transition rotations
+  xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
+
+  // Apply low-pass filtering to reduce jitter in yRotation
+  const smoothY = yRotation + (targetYRotation - yRotation) * dampingFactorY;
+  yRotation = Math.max(
+    Math.min(smoothY, params.camera.maxTiltUp),
+    params.camera.maxTiltDown
+  );
+
+  // Apply rotations to the sphere
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
 
@@ -205,3 +223,14 @@ const animate = () => {
   requestAnimationFrame(animate);
 };
 animate();
+
+// Register the service worker
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
+//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+//     }, (err) => {
+//       console.log('ServiceWorker registration failed: ', err);
+//     });
+//   });
+// }
