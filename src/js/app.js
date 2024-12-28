@@ -190,14 +190,20 @@ if (isMobile && window.DeviceOrientationEvent) {
   });
 }
 
-// Animation loop with individual damping factors
+// Animation loop with refined damping and smoothing
 const animate = () => {
-  const dampingFactorX = 0.25; // Horizontal damping factor
-  const dampingFactorY = 0.2; // Vertical damping factor (slightly slower for smoothness)
+  const dampingFactorX = 0.3; // Horizontal damping factor
+  const dampingFactorY = 0.15; // Vertical damping factor (even smoother for vertical motions)
 
   // Smoothly transition rotations
   xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
-  yRotation = lerp(yRotation, targetYRotation, dampingFactorY);
+
+  // Apply low-pass filtering to reduce jitter in yRotation
+  const smoothY = yRotation + (targetYRotation - yRotation) * dampingFactorY;
+  yRotation = Math.max(
+    Math.min(smoothY, params.camera.maxTiltUp),
+    params.camera.maxTiltDown
+  );
 
   // Apply rotations to the sphere
   skySphere.rotation.y = xRotation;
