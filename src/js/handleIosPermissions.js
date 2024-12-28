@@ -36,8 +36,8 @@ export const requestDeviceOrientation = (onPermissionGranted) => {
             onClick: () => console.log('Cancelled'),
           },
           {
-            text: 'Yes, do it',
-            onClick: () => console.log('Enabled!'),
+            text: 'Yes, Do It',
+            onClick: () => requestPermission(),
           },
         ],
       });
