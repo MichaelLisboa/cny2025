@@ -116,7 +116,7 @@ let targetXRotation = 0;
 let targetYRotation = 0;
 
 // Dead zone threshold for reducing shake
-const threshold = 0.02; // Adjust as needed to filter minor shakes
+const threshold = 0.075; // Adjust as needed to filter minor shakes
 
 // Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
@@ -188,7 +188,7 @@ window.addEventListener('touchmove', (event) => {
 
 // Animation loop
 const animate = () => {
-  const dampingFactor = 0.25; // Increased damping for smoother motion
+  const dampingFactor = 0.5; // Increased damping for smoother motion
 
   xRotation = lerp(xRotation, targetXRotation, dampingFactor);
   yRotation = lerp(yRotation, targetYRotation, dampingFactor);
