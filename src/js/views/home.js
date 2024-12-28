@@ -1,57 +1,66 @@
 import { gsap } from 'gsap';
 import { createButton } from '../../components/Button.js';
 
-const getTextImageStyles = () => ({
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  willChange: 'transform',
-  maxWidth: '100%',
-  height: 'auto',
+const getlogoImageStyles = () => ({
+    position: 'absolute',
+    top: '30%',
+    left: '50%',
+    transform: 'translate(-50%, -70%)',
+    willChange: 'transform',
+    maxWidth: '100%',
+    height: 'auto',
 });
 
-const setupFloatingAnimation = (element, offset, range) => {
-  const timeline = gsap.timeline({ repeat: -1, yoyo: true });
-  timeline.to(offset, {
-    y: gsap.utils.random(range.minY, range.maxY, true),
-    x: gsap.utils.random(range.minX, range.maxX, true),
-    ease: 'sine.inOut',
-    duration: gsap.utils.random(2, 4, true),
-  });
-  return offset;
+const setupFloatingAnimation = (element, range) => {
+    console.log('Animation range:', range);
+
+    // Create floating animation with recalculated values per iteration
+    const animate = () => {
+        gsap.to(element, {
+            x: gsap.utils.random(range.minX, range.maxX, true), // Random X within range
+            y: gsap.utils.random(range.minY, range.maxY, true), // Random Y within range
+            ease: 'sine.inOut',
+            duration: gsap.utils.random(2, 4, true), // Randomized duration
+            onComplete: animate, // Recursively restart the animation
+        });
+    };
+
+    // Start the animation loop
+    animate();
 };
 
 export const render = () => {
-  const app = document.getElementById('app');
+    const app = document.getElementById('app');
+    if (!app) {
+        console.error('App container not found!');
+        return;
+    }
 
-  // Create the text image overlay
-  const textImage = new Image();
-  textImage.src = new URL('../../assets/images/placeholder-text.png', import.meta.url).href;
-  Object.assign(textImage.style, getTextImageStyles());
-  app.appendChild(textImage);
+    // Create the text image overlay
+    const logoImage = new Image();
+    logoImage.src = new URL('../../assets/images/logo-text.png', import.meta.url).href;
+    Object.assign(logoImage.style, getlogoImageStyles());
+    app.appendChild(logoImage);
 
-  // Dynamically adjust text image width
-  const adjustTextImageWidth = () => {
-    textImage.style.width = window.innerWidth <= 1024 ? '80vw' : '30vw';
-  };
+    // Dynamically adjust text image width (with throttling)
+    const adjustlogoImageWidth = () => {
+        logoImage.style.width = window.innerWidth <= 1024 ? '80vw' : '30vw';
+    };
 
-  adjustTextImageWidth();
-  window.addEventListener('resize', adjustTextImageWidth);
+    // Throttle resize listener
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(adjustlogoImageWidth, 150); // Throttle to 150ms
+    });
+    adjustlogoImageWidth();
 
-  // Add button using the new ButtonComponent
-  createButton(app, 'Continue', () => {
-    window.history.pushState(null, null, '/about');
-    router();
-  });
+    // Add button using the new ButtonComponent
+    createButton(app, 'Continue', () => {
+        window.history.pushState(null, null, '/about');
+        router();
+    });
 
-  // Floating Animations
-  const textImageOffset = setupFloatingAnimation(textImage, { x: 0, y: 0 }, { minX: 5, maxX: 15, minY: 10, maxY: 30 });
-
-  // Animation Loop
-  const animate = () => {
-    textImage.style.transform = `translate(calc(-50% + ${textImageOffset.x}px), calc(-50% + ${textImageOffset.y}px))`;
-    requestAnimationFrame(animate);
-  };
-  animate();
+    // Floating Animations
+    setupFloatingAnimation(logoImage, { minX: -5, maxX: 5, minY: -20, maxY: 20 });
 };

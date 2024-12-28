@@ -3,29 +3,34 @@ import './router';
 
 // Select the app container
 const app = document.getElementById('app');
+if (!app) {
+  console.error('App container not found!');
+  throw new Error('App container is missing.');
+}
+
 const isMobile = window.innerWidth <= 1024;
 
-// Parameters for camera positioning, rotation, tilt, and texture settings
+// Parameters for camera and sphere settings
 const params = {
   camera: {
-    position: { x: 0, y: -0.5, z: 0 }, // Camera position (1.6 meters above the ground)
-    lookAt: { x: 0, y: 0, z: -1 }, // Camera lookAt position
-    mobilePosition: { x: 0, y: -0.3, z: 0.1 }, // Mobile camera position
-    mobileLookAt: { x: 0, y: -0.1, z: -1 }, // Mobile camera lookAt position
-    maxTiltUp: Math.PI / 6, // Maximum angle to tilt up (30 degrees)
-    maxTiltDown: -Math.PI / 6 // Limit to just slightly below the horizon (30 degrees)
+    position: { x: 0, y: -0.5, z: 0 },
+    lookAt: { x: 0, y: 0, z: -1 },
+    mobilePosition: { x: 0, y: -0.3, z: 0.1 },
+    mobileLookAt: { x: 0, y: -0.1, z: -1 },
+    maxTiltUp: Math.PI / 6,
+    maxTiltDown: -Math.PI / 6,
   },
   texture: {
-    repeat: { x: 1, y: 1 }, // Texture repeat settings
-    offset: { x: 1, y: 0 } // Texture offset settings
+    repeat: { x: 1, y: 1 },
+    offset: { x: 1, y: 0 },
   },
   sphere: {
-    scaleY: 2, // Vertical scale of the sphere
-    initialRotationX: -Math.PI / 8 // Initial rotation of the sphere (22.5 degrees downward)
-  }
+    scaleY: 2,
+    initialRotationX: -Math.PI / 8,
+  },
 };
 
-// Set up Three.js Scene
+// Initialize Three.js components
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   70,
@@ -33,109 +38,124 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+
 const renderer = new THREE.WebGLRenderer({ alpha: true });
-renderer.outputEncoding = THREE.sRGBEncoding; // Ensure correct color encoding
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.35;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.35;
 app.appendChild(renderer.domElement);
 
-// Create a sphere geometry for the 360-degree background
-const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
-// Create the texture with adjustments for alignment
-const texture = new THREE.TextureLoader().load(
-  new URL('../assets/images/starry-sky-background.png', import.meta.url).href
-);
-texture.encoding = THREE.sRGBEncoding; // Ensure correct color encoding
-texture.wrapS = THREE.RepeatWrapping; // Allow horizontal tiling
-texture.wrapT = THREE.ClampToEdgeWrapping; // Prevent vertical tiling
-texture.repeat.set(params.texture.repeat.x, params.texture.repeat.y); // Apply texture repeat settings
-texture.offset.set(params.texture.offset.x, params.texture.offset.y); // Apply texture offset settings
+// Create and configure the sphere
+const createSkySphere = () => {
+  const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+  const texture = new THREE.TextureLoader().load(
+    new URL('../assets/images/starry-sky-background.png', import.meta.url).href
+  );
 
-// Create the sphere geometry for the background
-const sphereMaterial = new THREE.MeshBasicMaterial({
-  map: texture,
-  side: THREE.BackSide, // Render on the inside of the sphere
-});
+  texture.encoding = THREE.sRGBEncoding;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.repeat.set(params.texture.repeat.x, params.texture.repeat.y);
+  texture.offset.set(params.texture.offset.x, params.texture.offset.y);
 
-// Create the sphere mesh
-const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-skySphere.rotation.x = Math.PI / 2 + params.sphere.initialRotationX; // Rotate sphere to better align with the texture and initial rotation
-skySphere.scale.y = params.sphere.scaleY; // Stretch the vertical height
+  const sphereMaterial = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.BackSide,
+  });
+
+  const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  skySphere.rotation.x = Math.PI / 2 + params.sphere.initialRotationX;
+  skySphere.scale.y = params.sphere.scaleY;
+  return skySphere;
+};
+
+const skySphere = createSkySphere();
 scene.add(skySphere);
 
-// Resize handler for Three.js canvas and sphere adjustment
+// Position the camera
+const setupCamera = () => {
+  if (isMobile) {
+    camera.position.set(
+      params.camera.mobilePosition.x,
+      params.camera.mobilePosition.y,
+      params.camera.mobilePosition.z
+    );
+    camera.lookAt(
+      params.camera.mobileLookAt.x,
+      params.camera.mobileLookAt.y,
+      params.camera.mobileLookAt.z
+    );
+  } else {
+    camera.position.set(
+      params.camera.position.x,
+      params.camera.position.y,
+      params.camera.position.z
+    );
+    camera.lookAt(
+      params.camera.lookAt.x,
+      params.camera.lookAt.y,
+      params.camera.lookAt.z
+    );
+  }
+};
+setupCamera();
+
+// Handle window resizing
 window.addEventListener('resize', () => {
-  renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Position the camera inside the sphere
-camera.position.set(params.camera.position.x, params.camera.position.y, params.camera.position.z);
-
-if (isMobile) {
-  camera.position.set(params.camera.mobilePosition.x, params.camera.mobilePosition.y, params.camera.mobilePosition.z);
-  camera.lookAt(params.camera.mobileLookAt.x, params.camera.mobileLookAt.y, params.camera.mobileLookAt.z);
-} else {
-  camera.lookAt(params.camera.lookAt.x, params.camera.lookAt.y, params.camera.lookAt.z);
-}
-
 // Variables for movement
-let xRotation = 0; // Initialize xRotation
-let yRotation = 0; // Initialize yRotation
+let xRotation = 0;
+let yRotation = 0;
 let targetXRotation = 0;
 let targetYRotation = 0;
 
-// Function to smooth rotations
+// Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
-// Function to calculate the shortest path rotation
-const shortestPathRotation = (current, target) => {
-  const difference = target - current;
-  if (difference > Math.PI) {
-    return current + (difference - 2 * Math.PI);
-  } else if (difference < -Math.PI) {
-    return current + (difference + 2 * Math.PI);
-  } else {
-    return current + difference;
-  }
+// Throttle function for input
+const throttle = (func, limit) => {
+  let inThrottle;
+  return (...args) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
 };
 
-// Handle mouse movement for sky rotation
-window.addEventListener('mousemove', (event) => {
-  const moveX = (event.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
-  const moveY = (event.clientY / window.innerHeight - 0.5) * Math.PI;
+// Handle mouse and touch input
+const handleInput = (clientX, clientY) => {
+  const moveX = (clientX / window.innerWidth - 0.5) * 2 * Math.PI;
+  const moveY = (clientY / window.innerHeight - 0.5) * Math.PI;
 
   targetXRotation = moveX;
-  targetYRotation = Math.max(Math.min(moveY, params.camera.maxTiltUp), params.camera.maxTiltDown);
-});
+  targetYRotation = Math.max(
+    Math.min(moveY, params.camera.maxTiltUp),
+    params.camera.maxTiltDown
+  );
+};
 
-// Handle touch gestures for sky rotation
-window.addEventListener('touchmove', (event) => {
+window.addEventListener('mousemove', throttle((event) => {
+  handleInput(event.clientX, event.clientY);
+}, 50));
+
+window.addEventListener('touchmove', throttle((event) => {
   if (event.touches.length === 1) {
     const touch = event.touches[0];
-    const moveX = (touch.clientX / window.innerWidth - 0.5) * 2 * Math.PI;
-    const moveY = (touch.clientY / window.innerHeight - 0.5) * Math.PI;
-
-    targetXRotation = moveX;
-    targetYRotation = Math.max(Math.min(moveY, params.camera.maxTiltUp), params.camera.maxTiltDown);
+    handleInput(touch.clientX, touch.clientY);
   }
-});
+}, 50));
 
-// Handle device orientation for sky rotation
-window.addEventListener('deviceorientation', (event) => {
-  const rotateX = (event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown) + params.camera.maxTiltDown;
-  const rotateY = (event.alpha / 180) * Math.PI; // Use alpha for horizontal rotation
-
-  targetXRotation = shortestPathRotation(xRotation, rotateY);
-  targetYRotation = Math.max(Math.min(-rotateX, params.camera.maxTiltUp), params.camera.maxTiltDown);
-});
-
-// Animation Loop
+// Animation loop
 const animate = () => {
-  const dampingFactor = 0.1; // Damping factor for smoothing
+  const dampingFactor = isMobile ? 0.15 : 0.1;
 
   xRotation = lerp(xRotation, targetXRotation, dampingFactor);
   yRotation = lerp(yRotation, targetYRotation, dampingFactor);

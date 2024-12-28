@@ -41,6 +41,9 @@ export const createButton = (container, text = 'Continue', onClick = () => {}) =
 
   // Add click handler to the wrapper
   wrapper.addEventListener('click', onClick);
+  wrapper.addEventListener('focus', (e) => {
+    e.preventDefault(); // Prevent focus outline
+  });
 
   // Append the wrapper to the container
   container.appendChild(wrapper);
