@@ -132,27 +132,6 @@ const shortestPath = (current, target) => {
   return target;
 };
 
-// Handle device orientation for mobile
-if (isMobile && window.DeviceOrientationEvent) {
-  window.addEventListener('deviceorientation', (event) => {
-    if (event.alpha !== null) {
-      const alpha = (event.alpha / 180) * Math.PI;
-
-      if (Math.abs(alpha - targetXRotation) > threshold) {
-        targetXRotation = shortestPath(xRotation, alpha);
-      }
-
-      const beta = -(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown);
-      if (Math.abs(beta - targetYRotation) > threshold) {
-        targetYRotation = Math.max(
-          Math.min(beta, params.camera.maxTiltUp),
-          params.camera.maxTiltDown
-        );
-      }
-    }
-  });
-}
-
 // Handle mouse and touch input
 let lastTouchX = 0;
 let lastTouchY = 0;
@@ -186,13 +165,41 @@ window.addEventListener('touchmove', (event) => {
   }
 });
 
-// Animation loop
+// Handle device orientation for mobile
+if (isMobile && window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', (event) => {
+    if (event.alpha !== null) {
+      const alpha = (event.alpha / 180) * Math.PI;
+
+      // Smooth horizontal rotation (alpha)
+      if (Math.abs(alpha - targetXRotation) > threshold) {
+        targetXRotation = shortestPath(xRotation, alpha);
+      }
+
+      // Smooth vertical rotation (beta)
+      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+
+      if (Math.abs(beta - targetYRotation) > threshold) {
+        targetYRotation = Math.max(
+          Math.min(-beta, params.camera.maxTiltUp),
+          params.camera.maxTiltDown
+        );
+      }
+    }
+  });
+}
+
+// Animation loop with individual damping factors
 const animate = () => {
-  const dampingFactor = 0.25; // Increased damping for smoother motion
+  const dampingFactorX = 0.25; // Horizontal damping factor
+  const dampingFactorY = 0.2; // Vertical damping factor (slightly slower for smoothness)
 
-  xRotation = lerp(xRotation, targetXRotation, dampingFactor);
-  yRotation = lerp(yRotation, targetYRotation, dampingFactor);
+  // Smoothly transition rotations
+  xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
+  yRotation = lerp(yRotation, targetYRotation, dampingFactorY);
 
+  // Apply rotations to the sphere
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
 
