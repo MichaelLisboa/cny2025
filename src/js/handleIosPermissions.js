@@ -1,4 +1,3 @@
-import { Color } from 'three/src/Three.Core.js';
 import { AppModal } from './AppModal.js';
 
 export const requestDeviceOrientation = (onPermissionGranted) => {

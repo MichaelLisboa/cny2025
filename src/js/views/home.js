@@ -31,6 +31,7 @@ const getMainContainerStyles = () => ({
     transform: 'translate(-50%, -80%)',
     textAlign: 'center',
     width: '80%',
+    maxWidth: '600px',
 });
 
 export const render = () => {
@@ -63,7 +64,7 @@ export const render = () => {
 
     // Add the button
     createButton(buttonContainer, 'Continue', () => {
-        window.history.pushState(null, null, '/about');
+        window.history.pushState(null, null, '#');
         router();
     }, false);
 
