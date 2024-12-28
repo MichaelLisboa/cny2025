@@ -188,7 +188,7 @@ window.addEventListener('touchmove', (event) => {
 
 // Animation loop
 const animate = () => {
-  const dampingFactor = 0.5; // Increased damping for smoother motion
+  const dampingFactor = 0.25; // Increased damping for smoother motion
 
   xRotation = lerp(xRotation, targetXRotation, dampingFactor);
   yRotation = lerp(yRotation, targetYRotation, dampingFactor);
