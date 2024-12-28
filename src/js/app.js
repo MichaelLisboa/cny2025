@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import './router';
-
 import { createCrowdScene } from './components/crowdScene';
 
 // Select the app container
@@ -113,103 +112,87 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+// Device orientation permission handling
+const requestDeviceOrientationPermission = () => {
+  if (
+    typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function'
+  ) {
+    DeviceOrientationEvent.requestPermission()
+      .then((response) => {
+        if (response === 'granted') {
+          window.addEventListener('deviceorientation', handleDeviceOrientation);
+        } else {
+          console.warn('Device orientation permission denied.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error requesting device orientation permission:', error);
+      });
+  } else {
+    console.warn('DeviceOrientationEvent.requestPermission() is not supported.');
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+  }
+};
+
+const createPermissionButton = () => {
+  const button = document.createElement('button');
+  button.textContent = 'Enable Motion';
+  Object.assign(button.style, {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    padding: '1rem 2rem',
+    fontSize: '1rem',
+    color: '#fff',
+    backgroundColor: '#333',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    zIndex: '1000'
+  });
+
+  button.addEventListener('click', () => {
+    requestDeviceOrientationPermission();
+    button.remove(); // Remove button after permission is requested
+  });
+
+  app.appendChild(button);
+};
+
+// Check if it's iOS
+if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  createPermissionButton();
+} else {
+  window.addEventListener('deviceorientation', handleDeviceOrientation);
+}
+
 // Variables for movement
 let xRotation = 0;
 let yRotation = 0;
 let targetXRotation = 0;
 let targetYRotation = 0;
 
-// Dead zone threshold for reducing shake
-const threshold = 0.02; // Adjust as needed to filter minor shakes
+const handleDeviceOrientation = (event) => {
+  const alpha = (event.alpha / 180) * Math.PI; // Map alpha to radians
+  const beta = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
+  const maxTiltUp = params.camera.maxTiltUp;
+  const maxTiltDown = params.camera.maxTiltDown;
 
-// Smooth rotations using lerp
-const lerp = (start, end, alpha) => start + (end - start) * alpha;
-
-// Calculate the shortest rotation path
-const shortestPath = (current, target) => {
-  const delta = target - current;
-  if (delta > Math.PI) {
-    return current + (delta - 2 * Math.PI);
-  } else if (delta < -Math.PI) {
-    return current + (delta + 2 * Math.PI);
-  }
-  return target;
-};
-
-// Handle mouse and touch input
-let lastTouchX = 0;
-let lastTouchY = 0;
-
-const handleInput = (deltaX, deltaY) => {
-  targetXRotation += deltaX * 0.005; // Adjust sensitivity
+  targetXRotation = alpha;
   targetYRotation = Math.max(
-    Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
-    params.camera.maxTiltDown
+    Math.min(-beta * (maxTiltUp - maxTiltDown), maxTiltUp),
+    maxTiltDown
   );
 };
 
-// Mouse input
-window.addEventListener('mousemove', (event) => {
-  if (!isMobile) {
-    const deltaX = event.movementX || 0;
-    const deltaY = event.movementY || 0;
-    handleInput(deltaX, deltaY);
-  }
-});
-
-// Touch input
-window.addEventListener('touchmove', (event) => {
-  if (event.touches.length === 1) {
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - lastTouchX;
-    const deltaY = touch.clientY - lastTouchY;
-    lastTouchX = touch.clientX;
-    lastTouchY = touch.clientY;
-    handleInput(deltaX, deltaY);
-  }
-});
-
-// Handle device orientation for mobile
-if (isMobile && window.DeviceOrientationEvent) {
-  window.addEventListener('deviceorientation', (event) => {
-    if (event.alpha !== null) {
-      const alpha = (event.alpha / 180) * Math.PI;
-
-      // Smooth horizontal rotation (alpha)
-      if (Math.abs(alpha - targetXRotation) > threshold) {
-        targetXRotation = shortestPath(xRotation, alpha);
-      }
-
-      // Smooth vertical rotation (beta)
-      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
-      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
-
-      if (Math.abs(beta - targetYRotation) > threshold) {
-        targetYRotation = Math.max(
-          Math.min(-beta, params.camera.maxTiltUp),
-          params.camera.maxTiltDown
-        );
-      }
-    }
-  });
-}
-
-// Animation loop with refined damping and smoothing
+// Animation loop
 const animate = () => {
-  const dampingFactorX = 0.3; // Horizontal damping factor
-  const dampingFactorY = 0.15; // Vertical damping factor (even smoother for vertical motions)
+  const dampingFactor = 0.1;
+  xRotation += (targetXRotation - xRotation) * dampingFactor;
+  yRotation += (targetYRotation - yRotation) * dampingFactor;
 
-  // Smoothly transition rotations
-  xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
-
-  // Apply low-pass filtering to reduce jitter in yRotation
-  const smoothY = yRotation + (targetYRotation - yRotation) * dampingFactorY;
-  yRotation = Math.max(
-    Math.min(smoothY, params.camera.maxTiltUp),
-    params.camera.maxTiltDown
-  );
-
-  // Apply rotations to the sphere
   skySphere.rotation.y = xRotation;
   skySphere.rotation.x = yRotation;
 
@@ -217,14 +200,3 @@ const animate = () => {
   requestAnimationFrame(animate);
 };
 animate();
-
-// Register the service worker
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/src/js/serviceWorker.js').then((registration) => {
-//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
-//     }, (err) => {
-//       console.log('ServiceWorker registration failed: ', err);
-//     });
-//   });
-// }
