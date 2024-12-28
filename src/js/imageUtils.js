@@ -75,6 +75,7 @@ export const createImageElement = (imageNameWithExtension, screenWidth, isProduc
   const img = document.createElement('img');
   img.src = isProduction ? placeholderImageUrl : fullImageUrl;
   img.alt = imageNameWithExtension;
+  img.loading = 'lazy'; // Lazy load the image
   if (isProduction) {
     img.className = 'blur-up'; // Add blur-up class for initial blur effect in production
     img.onload = () => {
