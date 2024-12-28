@@ -115,6 +115,9 @@ let yRotation = 0;
 let targetXRotation = 0;
 let targetYRotation = 0;
 
+// Dead zone threshold for reducing shake
+const threshold = 0.02; // Adjust as needed to filter minor shakes
+
 // Smooth rotations using lerp
 const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
@@ -134,11 +137,18 @@ if (isMobile && window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', (event) => {
     if (event.alpha !== null) {
       const alpha = (event.alpha / 180) * Math.PI;
-      targetXRotation = shortestPath(xRotation, alpha);
-      targetYRotation = Math.max(
-        Math.min(-(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown), params.camera.maxTiltUp),
-        params.camera.maxTiltDown
-      );
+
+      if (Math.abs(alpha - targetXRotation) > threshold) {
+        targetXRotation = shortestPath(xRotation, alpha);
+      }
+
+      const beta = -(event.beta - 90) / 90 * (params.camera.maxTiltUp - params.camera.maxTiltDown);
+      if (Math.abs(beta - targetYRotation) > threshold) {
+        targetYRotation = Math.max(
+          Math.min(beta, params.camera.maxTiltUp),
+          params.camera.maxTiltDown
+        );
+      }
     }
   });
 }
@@ -178,7 +188,7 @@ window.addEventListener('touchmove', (event) => {
 
 // Animation loop
 const animate = () => {
-  const dampingFactor = 0.3;
+  const dampingFactor = 0.25; // Increased damping for smoother motion
 
   xRotation = lerp(xRotation, targetXRotation, dampingFactor);
   yRotation = lerp(yRotation, targetYRotation, dampingFactor);
