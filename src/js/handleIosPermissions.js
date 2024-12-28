@@ -34,13 +34,14 @@ export const requestDeviceOrientation = (onPermissionGranted) => {
         description: 'Would you like to enable motion functionality for better interaction?',
         actions: [
           {
-            text: 'No, thanks',
-            onClick: () => console.log('Permission request canceled.'),
+            text: 'No, I\'m a loser',
+            style: { fontWeight: 'normal', color: 'rgba(0, 122, 255, 1)' },
+            onClick: () => console.log('Cancelled'),
           },
           {
-            text: 'Yes, enable',
+            text: 'Yes, I effin\' rule!',
             onClick: () => {
-              console.log('Requesting permission from user...');
+              console.log('Yes clicked. Calling requestPermission().'); // Debugging log
               requestPermission();
             },
           },
