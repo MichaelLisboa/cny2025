@@ -37,6 +37,9 @@ export const createCrowdScene = (container) => {
     let parallaxX = 0;
     let parallaxY = 0;
 
+    // Helper to clamp values
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
     // Update parallax using GSAP
     const updateParallax = (xPercent, yPercent) => {
         gsap.to(crowdImage, {
@@ -52,9 +55,15 @@ export const createCrowdScene = (container) => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const xPercent = ((event.clientX / viewportWidth) - 0.5) * (isMobile ? 50 : 30); // Wider shift on mobile
-        const yPercent = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * (isMobile ? 25 : 15), 0), -10); // Adjusted vertical shift
+        // Calculate parallax offset
+        let xPercent = ((event.clientX / viewportWidth) - 0.5) * (isMobile ? 50 : 30); // Wider shift on mobile
+        let yPercent = Math.max(Math.min((event.clientY / viewportHeight - 0.5) * (isMobile ? 25 : 15), 0), -10); // Adjusted vertical shift
 
+        // Clamp xPercent to prevent gaps
+        const maxHorizontalShift = isMobile ? 50 : 30; // Match to width scaling
+        xPercent = clamp(xPercent, -maxHorizontalShift, maxHorizontalShift);
+
+        // Update the animation state
         parallaxX = xPercent;
         parallaxY = yPercent;
 
@@ -62,9 +71,14 @@ export const createCrowdScene = (container) => {
     };
 
     const handleDeviceOrientation = (event) => {
-        const xPercent = (event.gamma / 45) * (isMobile ? 20 : 15); // Responsive horizontal parallax
-        const yPercent = Math.max(Math.min((event.beta / 90) * (isMobile ? -20 : -15), 0), -10); // Responsive vertical parallax
+        let xPercent = (event.gamma / 45) * (isMobile ? 20 : 15); // Responsive horizontal parallax
+        let yPercent = Math.max(Math.min((event.beta / 90) * (isMobile ? -20 : -15), 0), -10); // Responsive vertical parallax
 
+        // Clamp xPercent to prevent gaps
+        const maxHorizontalShift = isMobile ? 20 : 15; // Match to width scaling
+        xPercent = clamp(xPercent, -maxHorizontalShift, maxHorizontalShift);
+
+        // Update the animation state
         parallaxX = xPercent;
         parallaxY = yPercent;
 
