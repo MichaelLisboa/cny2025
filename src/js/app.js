@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import './router';
+import getDeviceInfo from './deviceUtils';
 import { requestDeviceOrientation } from './handleIosPermissions';
 import { createCrowdScene } from './components/crowdScene';
-import getDeviceInfo from './deviceUtils';
 import { createNavBar } from './components/NavBar.js';
 
 // Select the app container

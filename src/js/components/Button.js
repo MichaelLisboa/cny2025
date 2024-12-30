@@ -16,6 +16,8 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
     cursor: 'pointer',
     overflow: 'hidden',
     transition: 'box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out',
+
+    backdropFilter: "blur(8px)",
   });
 
   // Create the actual link inside the wrapper
