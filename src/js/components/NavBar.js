@@ -20,28 +20,25 @@ export const createNavBar = () => {
         alignItems: "center",
         justifyContent: "space-around",
         width: "90%",
-        maxWidth: "640px",
+        maxWidth: "800px",
         gap: "0px",
     });
 
-    const leftLink = document.createElement("a");
-    leftLink.textContent = "MAKE A WISH";
-    Object.assign(leftLink.style, {
-        fontSize: "clamp(14px, 2vw, 18px)", // Responsive text size
-        fontWeight: "bold",
-        color: "#fff",
-        textAlign: "right",
-        textDecoration: "none",
-    });
+    const createLink = (text) => {
+        const link = document.createElement("a");
+        link.textContent = text;
+        Object.assign(link.style, {
+            fontSize: "clamp(14px, 2vw, 18px)", // Responsive text size
+            fontWeight: "bold",
+            color: "#fff",
+            textDecoration: "none",
+            whiteSpace: "nowrap", // Prevent text from wrapping
+        });
+        return link;
+    };
 
-    const rightLink = document.createElement("a");
-    rightLink.textContent = "YOUR FORTUNE";
-    Object.assign(rightLink.style, {
-        fontSize: "clamp(14px, 2vw, 18px)", // Responsive text size
-        fontWeight: "bold",
-        color: "#fff",
-        textDecoration: "none",
-    });
+    const leftLink = createLink("MAKE A WISH");
+    const rightLink = createLink("YOUR FORTUNE");
 
     const logoContainer = document.createElement("div");
     Object.assign(logoContainer.style, {
@@ -55,7 +52,6 @@ export const createNavBar = () => {
         alignItems: "center",
     });
 
-    // Add a child div for text or an image inside the logoContainer
     const logoContent = document.createElement("div");
     Object.assign(logoContent.style, {
         display: "flex",
@@ -71,15 +67,47 @@ export const createNavBar = () => {
         color: "#000", // Black text color
     });
 
+    logoContent.appendChild(logoText);
+    logoContainer.appendChild(logoContent);
+
     navContent.appendChild(leftLink);
     navContent.appendChild(logoContainer);
     navContent.appendChild(rightLink);
     navbar.appendChild(navContent);
-
-    logoContainer.appendChild(logoContent); // Add logoContent as a child of logoContainer
-    logoContent.appendChild(logoText); // Add logoText as a child of logoContent
-
     document.body.appendChild(navbar);
+
+    const adjustNavbarStyles = () => {
+        const width = window.innerWidth;
+
+        if (width >= 2560) {
+            navbar.style.height = "120px";
+            logoContainer.style.width = "120px";
+            logoContainer.style.height = "120px";
+            leftLink.style.fontSize = "2.25rem";
+            rightLink.style.fontSize = "2.25rem";
+            logoText.style.fontSize = "1.5rem";
+        } else if (width >= 1024) {
+            navbar.style.height = "72px";
+            logoContainer.style.width = "100px";
+            logoContainer.style.height = "100px";
+            leftLink.style.fontSize = "2rem";
+            rightLink.style.fontSize = "2rem";
+            logoText.style.fontSize = "1.25rem";
+        } else {
+            navbar.style.height = "56px";
+            logoContainer.style.width = "96px";
+            logoContainer.style.height = "96px";
+            leftLink.style.fontSize = "1.5rem";
+            rightLink.style.fontSize = "1.5rem";
+            logoText.style.fontSize = "1rem";
+        }
+    };
+
+    // Initial adjustment
+    adjustNavbarStyles();
+
+    // Re-adjust on window resize
+    window.addEventListener('resize', adjustNavbarStyles);
 };
 
 // Call the function to add the navbar

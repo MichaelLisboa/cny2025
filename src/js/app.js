@@ -15,8 +15,8 @@ if (!app) {
 createNavBar(app)
 createCrowdScene(app);
 
-const { isMobile, OS, deviceType } = getDeviceInfo();
-console.log(`Device Info: isMobile=${isMobile}, OS=${OS}, deviceType=${deviceType}`);
+const { isMobile, OS, deviceType, browser } = getDeviceInfo();
+console.log(`Device Info: isMobile=${isMobile}, OS=${OS}, deviceType=${deviceType}, browser=${browser}`);
 
 // Parameters for camera and sphere settings
 const params = {
@@ -111,10 +111,14 @@ const setupCamera = () => {
 setupCamera();
 
 // Handle window resizing
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }, 150); // Throttle to 150ms
 });
 
 // Variables for movement
