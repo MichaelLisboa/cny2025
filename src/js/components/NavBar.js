@@ -20,7 +20,7 @@ export const createNavBar = () => {
         alignItems: "center",
         justifyContent: "space-around",
         width: "90%",
-        maxWidth: "800px",
+        maxWidth: "clamp(480px, 40vw, 1200px)",
         gap: "0px",
     });
 
@@ -90,16 +90,16 @@ export const createNavBar = () => {
             navbar.style.height = "72px";
             logoContainer.style.width = "100px";
             logoContainer.style.height = "100px";
-            leftLink.style.fontSize = "2rem";
-            rightLink.style.fontSize = "2rem";
+            leftLink.style.fontSize = "1.25rem";
+            rightLink.style.fontSize = "1.25rem";
             logoText.style.fontSize = "1.25rem";
         } else {
             navbar.style.height = "56px";
-            logoContainer.style.width = "96px";
-            logoContainer.style.height = "96px";
-            leftLink.style.fontSize = "1.5rem";
-            rightLink.style.fontSize = "1.5rem";
-            logoText.style.fontSize = "1rem";
+            logoContainer.style.width = "72px";
+            logoContainer.style.height = "72px";
+            leftLink.style.fontSize = "0.9rem";
+            rightLink.style.fontSize = "0.9rem";
+            logoText.style.fontSize = "0,.9rem";
         }
     };
 
