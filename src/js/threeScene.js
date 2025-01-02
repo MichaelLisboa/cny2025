@@ -4,19 +4,20 @@ import { requestDeviceOrientation } from './handleIosPermissions';
 // Parameters for camera and sphere settings
 const params = {
   camera: {
-    position: { x: 0, y: -0.5, z: 0 },
-    lookAt: { x: 0, y: 0, z: -1 },
+    position: { x: 0, y: -0.25, z: -2 },
+    lookAt: { x: 0, y: -0.5, z: -4 },
     mobilePosition: { x: 0, y: -0.3, z: 0.1 },
-    mobileLookAt: { x: 0, y: -0.1, z: -1 },
-    maxTiltUp: Math.PI / 6,
-    maxTiltDown: -Math.PI / 6,
+    mobileLookAt: { x: 0, y: -0.3, z: -4 },
+    maxTiltUp: Math.PI / 12,
+    maxTiltDown: -Math.PI / 8,
   },
   texture: {
-    repeat: { x: 1, y: 1 },
+    repeat: { x: 3, y: 1 },
     offset: { x: 1, y: 0 },
   },
   sphere: {
-    scaleY: 2,
+    scaleY: 0.5,
+    scaleX: 1,
     initialRotationX: -Math.PI / 8,
   },
 };
@@ -41,7 +42,7 @@ export const initThreeScene = (app, isMobile) => {
 
   // Create and configure the sphere
   const createSkySphere = () => {
-    const sphereGeometry = new THREE.SphereGeometry(500, 60, 40);
+    const sphereGeometry = new THREE.SphereGeometry(1000, 60, 40);
     const texture = new THREE.TextureLoader().load(
       new URL('../assets/images/starry-sky-background.png', import.meta.url).href
     );
@@ -60,6 +61,7 @@ export const initThreeScene = (app, isMobile) => {
     const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     skySphere.rotation.x = Math.PI / 2 + params.sphere.initialRotationX;
     skySphere.scale.y = params.sphere.scaleY;
+    skySphere.scale.x = params.sphere.scaleX;
     return skySphere;
   };
 
