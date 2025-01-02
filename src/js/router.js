@@ -1,35 +1,59 @@
+import { home } from './views/home';
+import { enterBirthdateView } from './views/enterBirthdateView';
+
+// Define your routes
 const routes = {
-  '/': 'home',
-//   '/about': 'about',
-//   '/contact': 'contact'
+    '/': home,
+    '/enter-birthdate': enterBirthdateView,
+    // Add additional routes as needed
 };
 
-const loadView = (view) => {
-  const viewModule = import(`./views/${view}.js`);
-  viewModule.then(module => {
-    module.render();
-  }).catch(err => {
-    console.error(`Error loading view: ${view}`, err);
-  });
-};
-
-const router = () => {
-  const path = window.location.pathname;
-  const view = routes[path] || 'home';
-  loadView(view);
-};
-
-window.addEventListener('popstate', router);
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.body.addEventListener('click', (event) => {
-    if (event.target.matches('[data-link]')) {
-      event.preventDefault();
-      const url = event.target.href;
-      window.history.pushState(null, null, url);
-      router();
+// Function to load the correct view
+export const loadView = (path) => {
+    const app = document.getElementById('app');
+    if (!app) {
+        console.error("App container not found!");
+        return;
     }
-  });
 
-  router();
+    // 1) Create or select a router-view container
+    let routerContainer = document.getElementById('router-view');
+    if (!routerContainer) {
+        routerContainer = document.createElement('div');
+        routerContainer.id = 'router-view';
+        Object.assign(routerContainer.style, {
+            position: 'relative',
+            zIndex: '3', // Ensure it is above the crowd scene
+        });
+        app.appendChild(routerContainer);
+    }
+
+    // 2) Clear only the routerContainer
+    routerContainer.innerHTML = '';
+
+    // 3) Load the view if it exists
+    if (routes[path]) {
+        const viewNode = routes[path]();
+        if (viewNode) {
+            routerContainer.appendChild(viewNode);
+        } else {
+            console.error(`Route at "${path}" didn't return a valid DOM node.`);
+        }
+    } else {
+        console.error(`No view found for path: ${path}`);
+    }
+};
+
+// Set up navigation
+export const navigateTo = (path) => {
+    window.history.pushState({}, path, window.location.origin + path);
+    loadView(path);
+};
+
+// Handle back/forward navigation
+window.addEventListener('popstate', () => {
+    loadView(window.location.pathname);
 });
+
+// Load the initial view
+loadView(window.location.pathname || '/');

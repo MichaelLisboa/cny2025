@@ -1,5 +1,7 @@
+import { navigateTo } from '../router';
 import { createButton } from '../components/Button.js';
 import { createFloatingAnimation } from '../floatingAnimation.js';
+import { gsap } from 'gsap';
 
 // Logo image styles
 const getLogoImageStyles = () => ({
@@ -28,13 +30,15 @@ const getMainContainerStyles = () => ({
     position: 'absolute',
     top: '20%',
     left: '50%',
-    transform: 'translate(-50%, -80%)',
+    transform: 'translate(-50%, 0)', // Center horizontally, do not shift vertically
     textAlign: 'center',
     width: '80%',
     maxWidth: '600px',
+    opacity: '0', // Start with opacity 0 for fade-in effect
+    zIndex: '2', // Ensure it is above the crowd scene
 });
 
-export const render = () => {
+export const home = () => {
     const app = document.getElementById('app');
     if (!app) {
         console.error('App container not found!');
@@ -64,8 +68,8 @@ export const render = () => {
 
     // Add the button
     createButton(buttonContainer, 'Continue', () => {
-        window.history.pushState(null, null, '#');
-        router();
+        window.history.pushState(null, null, '/');
+        navigateTo('/enter-birthdate');
     }, false);
 
     // Append all elements to the main container
@@ -75,6 +79,9 @@ export const render = () => {
 
     // Append the main container to the app
     app.appendChild(mainContainer);
+
+    // Fade in the main container using GSAP
+    gsap.to(mainContainer, { opacity: 1, duration: 1.5 });
 
     // Dynamically adjust logo image width (with throttling)
     const adjustLogoImageWidth = () => {
@@ -89,6 +96,13 @@ export const render = () => {
     adjustLogoImageWidth();
 
     // Apply floating animation to the main container
-    const containerAnimation = createFloatingAnimation({ minX: -5, maxX: 5, minY: -20, maxY: 20 });
+    const containerAnimation = createFloatingAnimation({
+        minX: -5,
+        maxX: 5,
+        minY: 0,
+        maxY: 0, // Remove vertical movement to prevent sliding down
+    });
     containerAnimation(mainContainer); // Apply to the main container
+
+    return mainContainer;
 };

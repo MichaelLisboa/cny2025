@@ -6,12 +6,12 @@ export const createNavBar = () => {
         left: "0",
         width: "100%",
         height: "72px",
-        background: "linear-gradient(180deg, rgba(7, 28, 57, 0.7), rgba(7, 28, 57, 0))",
+        background: "linear-gradient(180deg, rgba(7, 28, 57, 0.6), rgba(7, 28, 57, 0.2.5) 30%, rgba(7, 28, 57, 0.075) 60%, rgba(7, 28, 57, 0) 100%)",
         zIndex: "10000",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backdropFilter: "blur(8px)",
+        backdropFilter: "blur(6px)",
     });
 
     const navContent = document.createElement("div");

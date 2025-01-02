@@ -1,9 +1,11 @@
 import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../floatingAnimation.js';
+import getDeviceInfo from '../deviceUtils';
 
 export const createCrowdScene = (container) => {
+    const { isMobile } = getDeviceInfo();
+
     const settings = {
-        isMobile: window.innerWidth <= 768,
         image: {
             desktopWidth: 1.5, // Desktop image width multiplier relative to viewport width
             mobileWidth: 3.0, // Mobile image width multiplier
@@ -26,8 +28,6 @@ export const createCrowdScene = (container) => {
         },
     };
 
-    const isMobile = settings.isMobile;
-
     // Calculate image width and offsets dynamically
     const imageWidth = isMobile
         ? settings.image.mobileWidth * window.innerWidth
@@ -41,8 +41,8 @@ export const createCrowdScene = (container) => {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
-        zIndex: '0',
         pointerEvents: 'none',
+        zIndex: '1', // Ensure it is below the router view
     });
 
     const crowdImage = new Image();

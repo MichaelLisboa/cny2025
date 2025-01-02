@@ -1,9 +1,11 @@
 import { AppModal } from './AppModal.js';
+import getDeviceInfo from './deviceUtils';
 
 const PERMISSION_TIMEOUT = 1200000; // 20 minutes
 
 export const requestDeviceOrientation = (onPermissionGranted) => {
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const { OS } = getDeviceInfo();
+  const isIOS = OS === 'iOS';
 
   const requestPermission = () => {
     console.log('Requesting permission...');
