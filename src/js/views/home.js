@@ -102,7 +102,6 @@ export const home = () => {
     contentContainer.appendChild(logoImage);
     contentContainer.appendChild(textDiv);
     contentContainer.appendChild(buttonContainer);
-
     mainContainer.appendChild(contentContainer);
 
     // Append the main container to the app
@@ -127,8 +126,8 @@ export const home = () => {
     const containerAnimation = createFloatingAnimation({
         minX: -5,
         maxX: 5,
-        minY: 0,
-        maxY: 0, // Remove vertical movement to prevent sliding down
+        minY: -10,
+        maxY: 10, // Remove vertical movement to prevent sliding down
     });
     containerAnimation(contentContainer); // Apply to the content container
 
