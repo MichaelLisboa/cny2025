@@ -1,10 +1,8 @@
-import * as THREE from 'three';
 import './router';
 import getDeviceInfo from './deviceUtils';
-import { requestDeviceOrientation } from './handleIosPermissions';
-import { createCrowdScene } from './components/crowdScene';
 import { createNavBar } from './components/NavBar.js';
-import { initThreeScene } from './threeScene.js'; // Import the new module
+import { initThreeScene } from './threeScene.js';
+import { createCrowdScene } from './components/crowdScene';
 
 // Select the app container
 const app = document.getElementById('app');
@@ -13,11 +11,10 @@ if (!app) {
   throw new Error('App container is missing.');
 }
 
-const { isMobile, OS, deviceType, browser } = getDeviceInfo();
-console.log(`Device Info: isMobile=${isMobile}, OS=${OS}, deviceType=${deviceType}, browser=${browser}`);
+const { isMobile, oS, deviceType, browser } = getDeviceInfo();
 
 // Initialize the Three.js scene
-initThreeScene(app, isMobile); // Pass app & isMobile as needed
+initThreeScene(app, isMobile, oS, deviceType, browser); // Pass app & isMobile as needed
 
 // Create the crowd scene
 createCrowdScene(app);

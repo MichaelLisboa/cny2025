@@ -59,7 +59,7 @@ const getDeviceInfo = () => {
 
   return {
     isMobile,
-    OS,
+    oS: OS,
     deviceType,
     browser,
   };

@@ -22,7 +22,8 @@ const params = {
   },
 };
 
-export const initThreeScene = (app, isMobile) => {
+export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
+  console.log('Initializing Three.js scene', isMobile, oS, browser);
   // Initialize Three.js components
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(

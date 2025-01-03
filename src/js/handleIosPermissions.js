@@ -4,8 +4,8 @@ import getDeviceInfo from './deviceUtils';
 const PERMISSION_TIMEOUT = 1200000; // 20 minutes
 
 export const requestDeviceOrientation = (onPermissionGranted) => {
-  const { OS } = getDeviceInfo();
-  const isIOS = OS === 'iOS';
+  const { oS } = getDeviceInfo();
+  const isIOS = oS === 'iOS';
 
   const requestPermission = () => {
     console.log('Requesting permission...');

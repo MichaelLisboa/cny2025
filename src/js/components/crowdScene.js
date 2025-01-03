@@ -1,5 +1,4 @@
 import { gsap } from 'gsap';
-import { createFloatingAnimation } from '../floatingAnimation.js';
 import getDeviceInfo from '../deviceUtils';
 
 export const createCrowdScene = (container) => {
@@ -7,10 +6,10 @@ export const createCrowdScene = (container) => {
 
     const settings = {
         image: {
-            desktopWidth: 1.5, // Desktop image width multiplier relative to viewport width
-            mobileWidth: 3.0, // Mobile image width multiplier
+            desktopWidth: 2, // Desktop image width multiplier relative to viewport width
+            mobileWidth: 4.0, // Mobile image width multiplier
             desktopBottom: '-1%', // Desktop bottom offset
-            mobileBottom: '0%', // Mobile bottom offset
+            mobileBottom: '-1%', // Mobile bottom offset
         },
         parallax: {
             desktop: {
@@ -21,10 +20,10 @@ export const createCrowdScene = (container) => {
             },
         },
         floatingAnimation: {
-            minX: -1,
-            maxX: 1,
-            minY: 0,
-            maxY: 1,
+            minX: -10,
+            maxX: 10,
+            minY: -5,
+            maxY: 2,
         },
     };
 
@@ -125,8 +124,23 @@ export const createCrowdScene = (container) => {
         window.addEventListener('mousemove', handleMouseMove);
     }
 
+    const createFloatingAnimation = (range) => {
+        return (element) => {
+            const animate = () => {
+                gsap.to(element, {
+                    x: gsap.utils.random(range.minX, range.maxX, true), // Random X within range
+                    y: gsap.utils.random(range.minY, range.maxY, true), // Random Y within range
+                    ease: 'sine.inOut',
+                    duration: gsap.utils.random(0.5, 2, true), // Randomized duration
+                    onComplete: animate, // Recursively restart the animation
+                });
+            };
+            animate(); // Start the animation
+        };
+    };
+
     const floatingAnimation = createFloatingAnimation(settings.floatingAnimation);
-    floatingAnimation(crowdScene);
+    floatingAnimation(crowdImage);
 
     return crowdScene;
 };
