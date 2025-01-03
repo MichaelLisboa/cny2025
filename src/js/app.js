@@ -1,8 +1,5 @@
 import './router';
-import getDeviceInfo from './deviceUtils';
 import { createNavBar } from './components/NavBar.js';
-import { initThreeScene } from './threeScene.js';
-import { createCrowdScene } from './components/crowdScene';
 
 // Select the app container
 const app = document.getElementById('app');
@@ -10,14 +7,6 @@ if (!app) {
   console.error('App container not found!');
   throw new Error('App container is missing.');
 }
-
-const { isMobile, oS, deviceType, browser } = getDeviceInfo();
-
-// Initialize the Three.js scene
-initThreeScene(app, isMobile, oS, deviceType, browser); // Pass app & isMobile as needed
-
-// Create the crowd scene
-createCrowdScene(app);
 
 // Create the navbar
 createNavBar(app);

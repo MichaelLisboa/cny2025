@@ -33,6 +33,7 @@ export const createCrowdScene = (container) => {
         : settings.image.desktopWidth * window.innerWidth;
 
     const crowdScene = document.createElement('div');
+    crowdScene.id = 'crowdScene';
     Object.assign(crowdScene.style, {
         position: 'absolute',
         bottom: isMobile ? settings.image.mobileBottom : settings.image.desktopBottom,
@@ -45,6 +46,7 @@ export const createCrowdScene = (container) => {
     });
 
     const crowdImage = new Image();
+    crowdImage.id = 'crowdImage';
     crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href;
 
     Object.assign(crowdImage.style, {
@@ -116,7 +118,8 @@ export const createCrowdScene = (container) => {
         }
     };
 
-    if (window.DeviceOrientationEvent && /Mobi/i.test(navigator.userAgent)) {
+    // use deviceUtils to check if the device is mobile
+    if (window.DeviceOrientationEvent && isMobile) {
         window.addEventListener('deviceorientation', handleDeviceOrientation);
         window.addEventListener('touchstart', handleTouchStart);
         window.addEventListener('touchmove', handleTouchMove);
