@@ -1,5 +1,6 @@
 import { navigateTo } from '../utils/router.js';
 import getDeviceInfo from '../utils/deviceUtils.js';
+import { createPictureElement } from '../utils/imageUtils.js';
 import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../utils/floatingAnimation.js';
 import { initThreeScene } from '../threeScene.js';
@@ -50,11 +51,6 @@ const getMainContainerStyles = () => ({
 });
 
 export const home = () => {
-    const app = document.getElementById('app');
-    if (!app) {
-        console.error('App container not found!');
-        return;
-    }
 
     const { isMobile, oS, deviceType, browser } = getDeviceInfo();
 
@@ -67,9 +63,8 @@ export const home = () => {
     Object.assign(contentContainer.style, getContentContainerStyles());
     contentContainer.className = 'content-container';
 
-    // Create the logo image
-    const logoImage = new Image();
-    logoImage.src = new URL('../../assets/images/logo-text.png', import.meta.url).href;
+    // Use createPictureElement to create the logo-text image
+    const logoImage = createPictureElement('logo-text.png');
     Object.assign(logoImage.style, getLogoImageStyles());
 
     // Create the text div with <p> tag

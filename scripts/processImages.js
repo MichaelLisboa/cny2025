@@ -5,7 +5,7 @@ const glob = require('glob');
 
 const inputFolder = path.join(__dirname, '../src/assets/images');
 const outputFolder = path.join(__dirname, '../public/assets/images');
-const resolutions = [480, 768, 1440, 2160];
+const resolutions = [480, 768, 1024, 1440, 1920, 3840];
 
 async function processImages() {
   try {

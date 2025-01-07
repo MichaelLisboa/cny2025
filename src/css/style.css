@@ -45,6 +45,11 @@ p.text-large {
   line-height: 1.5;
 }
 
+picture {
+  display: block;
+  padding: 0;
+}
+
 @media (min-width: 1024px) {
   p.text-medium {
     font-size: 1.5rem;
