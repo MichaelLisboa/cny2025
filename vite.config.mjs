@@ -16,6 +16,11 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
         assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },

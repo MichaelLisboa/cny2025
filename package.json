@@ -8,8 +8,8 @@
     "dev": "vite",
     "process-images": "node ./scripts/processImages.js",
     "vite-build": "npm run process-images && vite build",
-    "serve": "vite preview --port 3000",
-    "build": "npm run vite-build && npm run serve"
+    "serve": "vite preview",
+    "build": "npm run vite-build"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,6 @@
     "concurrently": "^7.0.0",
     "eslint": "^9.17.0",
     "gsap": "^3.12.5",
-    "open": "^8.4.0",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "sharp": "^0.33.5",

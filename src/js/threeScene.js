@@ -36,7 +36,7 @@ export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
   const renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  // renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.35;
   app.appendChild(renderer.domElement);
@@ -48,7 +48,7 @@ export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
       new URL('../assets/images/starry-sky-background.png', import.meta.url).href
     );
 
-    texture.encoding = THREE.sRGBEncoding;
+    // texture.encoding = THREE.sRGBEncoding;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.repeat.set(params.texture.repeat.x, params.texture.repeat.y);

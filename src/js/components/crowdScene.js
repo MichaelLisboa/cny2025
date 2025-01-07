@@ -72,7 +72,7 @@ export const createCrowdScene = (container) => {
         width: `${imageWidth}px`,
         height: 'auto',
         position: 'absolute',
-        bottom: settings.image.desktopBottom,
+        bottom: isMobile ? settings.image.mobileBottom : settings.image.desktopBottom,
         left: `${(window.innerWidth - imageWidth) / 2}px`, // Center image
         transformOrigin: 'center bottom',
       });
@@ -88,14 +88,16 @@ export const createCrowdScene = (container) => {
     let parallaxX = 0;
   
     const updateParallax = (xShift) => {
-      const maxXShift = (imageWidth - window.innerWidth) / 2;
-      const clampedX = clamp(xShift, -maxXShift, maxXShift);
+      if (crowdImageElement) {
+        const maxXShift = (imageWidth - window.innerWidth) / 2;
+        const clampedX = clamp(xShift, -maxXShift, maxXShift);
   
-      gsap.to(crowdImageElement, {
-        x: `${clampedX}px`,
-        ease: 'power2.out',
-        duration: 0.6,
-      });
+        gsap.to(crowdImageElement, {
+          x: `${clampedX}px`,
+          ease: 'power2.out',
+          duration: 0.6,
+        });
+      }
     };
   
     const handleMouseMove = (event) => {
@@ -107,11 +109,13 @@ export const createCrowdScene = (container) => {
   
     const handleResize = () => {
       imageWidth = calculateImageWidth();
-      Object.assign(crowdImageElement.style, {
-        width: `${imageWidth}px`,
-        left: `${(window.innerWidth - imageWidth) / 2}px`,
-      });
-      updateParallax(parallaxX);
+      if (crowdImageElement) {
+        Object.assign(crowdImageElement.style, {
+          width: `${imageWidth}px`,
+          left: `${(window.innerWidth - imageWidth) / 2}px`,
+        });
+        updateParallax(parallaxX);
+      }
     };
   
     // Attach event listeners
