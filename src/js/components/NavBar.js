@@ -1,4 +1,10 @@
+import getDeviceInfo from "../utils/deviceUtils";
+
 export const createNavBar = () => {
+
+    // Get device information
+    const { isMobile } = getDeviceInfo();
+
     const navbar = document.createElement("div");
     Object.assign(navbar.style, {
         position: "fixed",
@@ -6,7 +12,7 @@ export const createNavBar = () => {
         left: "0",
         width: "100%",
         height: "72px",
-        background: "linear-gradient(180deg, rgba(7, 28, 57, 0.6), rgba(7, 28, 57, 0.2.5) 30%, rgba(7, 28, 57, 0.075) 60%, rgba(7, 28, 57, 0) 100%)",
+        background: "linear-gradient(180deg, rgba(7, 28, 57, 0.6), rgba(7, 28, 57, 0.25) 30%, rgba(7, 28, 57, 0.075) 60%, rgba(7, 28, 57, 0) 100%)",
         zIndex: "10000",
         display: "flex",
         justifyContent: "center",
@@ -74,7 +80,7 @@ export const createNavBar = () => {
     navContent.appendChild(logoContainer);
     navContent.appendChild(rightLink);
     navbar.appendChild(navContent);
-    document.body.appendChild(navbar);
+    app.appendChild(navbar);
 
     const adjustNavbarStyles = () => {
         const width = window.innerWidth;
@@ -105,9 +111,72 @@ export const createNavBar = () => {
 
     // Initial adjustment
     adjustNavbarStyles();
+    window.addEventListener("resize", adjustNavbarStyles);
 
-    // Re-adjust on window resize
-    window.addEventListener('resize', adjustNavbarStyles);
+    if (isMobile) {
+        // Drag-to-refresh logic
+        const refreshIndicator = document.createElement("div");
+        Object.assign(refreshIndicator.style, {
+            position: "absolute",
+            top: "32",
+            left: "0",
+            right: "0",
+            height: "48px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.2rem",
+            fontWeight: "700",
+            zIndex: "1000",
+            opacity: "0",
+            transition: "opacity 0.3s ease",
+        });
+        refreshIndicator.textContent = "Refreshing...";
+        document.body.appendChild(refreshIndicator);
+
+        const appContainer = document.body;
+
+        let isDragging = false;
+        let startY = 0;
+        let currentY = 0;
+
+        const onDragStart = (event) => {
+            isDragging = true;
+            startY = event.touches ? event.touches[0].clientY : event.clientY;
+        };
+
+        const onDragMove = (event) => {
+            if (!isDragging) return;
+
+            currentY = event.touches ? event.touches[0].clientY : event.clientY;
+            const offsetY = currentY - startY;
+
+            if (offsetY > 0) {
+                appContainer.style.transform = `translateY(${Math.min(offsetY, 150)}px)`;
+            }
+        };
+
+        const onDragEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const offsetY = currentY - startY;
+            if (offsetY > 100) {
+                refreshIndicator.style.opacity = "1";
+                setTimeout(() => {
+                    location.reload(); // Basic browser refresh
+                }, 500);
+            } else {
+                appContainer.style.transition = "transform 0.3s ease";
+                appContainer.style.transform = "translateY(0)";
+            }
+        };
+
+        // Attach event listeners only to navbar
+        navbar.addEventListener("touchstart", onDragStart);
+        navbar.addEventListener("touchmove", onDragMove);
+        navbar.addEventListener("touchend", onDragEnd);
+    }
 };
 
 // Call the function to add the navbar

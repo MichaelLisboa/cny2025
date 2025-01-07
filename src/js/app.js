@@ -1,5 +1,7 @@
-import './router';
+import { initializeState } from './utils/stateManager.js';
+import './utils/router.js';
 import { createNavBar } from './components/NavBar.js';
+
 
 // Select the app container
 const app = document.getElementById('app');
@@ -10,6 +12,13 @@ if (!app) {
 
 // Create the navbar
 createNavBar(app);
+
+// Initialize the app state
+initializeState({
+  birthdate: null,
+  zodiac: null,
+  element: null,
+});
 
 // 1) Create the overlay div
 const orientationOverlay = document.createElement('div');

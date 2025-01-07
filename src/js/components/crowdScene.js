@@ -1,149 +1,132 @@
 import { gsap } from 'gsap';
-import getDeviceInfo from '../deviceUtils';
+import getDeviceInfo from '../utils/deviceUtils';
+import { createPictureElement } from '../utils/imageUtils.js';
+
+// Throttle function
+const throttle = (func, limit) => {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+};
 
 export const createCrowdScene = (container) => {
     const { isMobile } = getDeviceInfo();
-
+  
     const settings = {
-        image: {
-            desktopWidth: 2, // Desktop image width multiplier relative to viewport width
-            mobileWidth: 4.0, // Mobile image width multiplier
-            desktopBottom: '-1%', // Desktop bottom offset
-            mobileBottom: '-1%', // Mobile bottom offset
-        },
-        parallax: {
-            desktop: {
-                maxHorizontalShift: 30, // In percentage
-            },
-            mobile: {
-                maxHorizontalShift: 50, // In percentage
-            },
-        },
-        floatingAnimation: {
-            minX: -10,
-            maxX: 10,
-            minY: -5,
-            maxY: 2,
-        },
+      image: {
+        desktopWidth: 2, // Desktop image width multiplier relative to viewport width
+        mobileWidth: 4.0, // Mobile image width multiplier
+        desktopBottom: '-1%', // Desktop bottom offset
+        mobileBottom: '-1%', // Mobile bottom offset
+      },
+      parallax: {
+        desktop: { maxHorizontalShift: 30 }, // In percentage
+        mobile: { maxHorizontalShift: 50 }, // In percentage
+      },
+      floatingAnimation: {
+        minX: -10,
+        maxX: 10,
+        minY: -5,
+        maxY: 2,
+      },
     };
-
-    // Calculate image width and offsets dynamically
-    const imageWidth = isMobile
+  
+    // Calculate dynamic image width
+    const calculateImageWidth = () => {
+      return isMobile
         ? settings.image.mobileWidth * window.innerWidth
         : settings.image.desktopWidth * window.innerWidth;
-
+    };
+  
+    let imageWidth = calculateImageWidth();
+  
+    // Create crowd scene container
     const crowdScene = document.createElement('div');
     crowdScene.id = 'crowdScene';
     Object.assign(crowdScene.style, {
-        position: 'absolute',
-        bottom: isMobile ? settings.image.mobileBottom : settings.image.desktopBottom,
-        left: '0',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'hidden',
-        pointerEvents: 'none',
-        zIndex: '1', // Ensure it is below the router view
+      position: 'absolute',
+      bottom: '0',
+      left: '0',
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      pointerEvents: 'none',
+      zIndex: '1',
     });
-
-    const crowdImage = new Image();
+  
+    // Create picture element
+    const crowdImage = createPictureElement('crowd-scene.png');
     crowdImage.id = 'crowdImage';
-    crowdImage.src = new URL('../../assets/images/crowd-scene.png', import.meta.url).href;
-
-    Object.assign(crowdImage.style, {
-        width: `${imageWidth}px`, // Dynamically set image width
+  
+    // Apply styles to <img> inside the picture element
+    const crowdImageElement = crowdImage.querySelector('img');
+    if (crowdImageElement) {
+      Object.assign(crowdImageElement.style, {
+        width: `${imageWidth}px`,
         height: 'auto',
         position: 'absolute',
-        bottom: isMobile ? settings.image.mobileBottom : settings.image.desktopBottom,
-        left: `${(window.innerWidth - imageWidth) / 2}px`, // Center image initially
+        bottom: settings.image.desktopBottom,
+        left: `${(window.innerWidth - imageWidth) / 2}px`, // Center image
         transformOrigin: 'center bottom',
-    });
-
+      });
+    }
+  
+    // Add the picture element to the crowd scene
     crowdScene.appendChild(crowdImage);
     container.appendChild(crowdScene);
-
+  
+    // Parallax logic
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
+  
     let parallaxX = 0;
-
+  
     const updateParallax = (xShift) => {
-        const maxXShift = (imageWidth - window.innerWidth) / 2; // Calculate clamping based on image and viewport width
-        const clampedX = clamp(xShift, -maxXShift, maxXShift); // Clamp horizontal shift
-
-        gsap.to(crowdImage, {
-            x: `${clampedX}px`, // Horizontal parallax in pixels
-            ease: 'power2.out',
-            duration: 0.6,
-        });
+      const maxXShift = (imageWidth - window.innerWidth) / 2;
+      const clampedX = clamp(xShift, -maxXShift, maxXShift);
+  
+      gsap.to(crowdImageElement, {
+        x: `${clampedX}px`,
+        ease: 'power2.out',
+        duration: 0.6,
+      });
     };
-
+  
     const handleMouseMove = (event) => {
-        const viewportWidth = window.innerWidth;
-
-        const xShift = ((event.clientX / viewportWidth) - 0.5) * (imageWidth - window.innerWidth);
-
-        parallaxX = xShift;
-
-        updateParallax(parallaxX);
+      const viewportWidth = window.innerWidth;
+      const xShift = ((event.clientX / viewportWidth) - 0.5) * (imageWidth - window.innerWidth);
+      parallaxX = xShift;
+      updateParallax(parallaxX);
     };
-
-    const handleDeviceOrientation = (event) => {
+  
+    const handleResize = () => {
+      imageWidth = calculateImageWidth();
+      Object.assign(crowdImageElement.style, {
+        width: `${imageWidth}px`,
+        left: `${(window.innerWidth - imageWidth) / 2}px`,
+      });
+      updateParallax(parallaxX);
+    };
+  
+    // Attach event listeners
+    if (window.DeviceOrientationEvent && isMobile) {
+      window.addEventListener('deviceorientation', (event) => {
         const maxXShift = (imageWidth - window.innerWidth) / 2;
         const xShift = (event.gamma / 45) * maxXShift;
-
         parallaxX = xShift;
-
         updateParallax(parallaxX);
-    };
-
-    let startTouch = { x: 0 };
-
-    const handleTouchStart = (event) => {
-        const touch = event.touches[0];
-        startTouch = { x: touch.clientX };
-    };
-
-    const handleTouchMove = (event) => {
-        if (event.touches.length === 1) {
-            const touch = event.touches[0];
-            const deltaX = touch.clientX - startTouch.x;
-
-            const maxXShift = (imageWidth - window.innerWidth) / 2;
-            const xShift = parallaxX + deltaX * 0.2; // Adjust sensitivity for touch
-
-            parallaxX = clamp(xShift, -maxXShift, maxXShift);
-
-            startTouch = { x: touch.clientX }; // Reset touch reference
-
-            updateParallax(parallaxX);
-        }
-    };
-
-    // use deviceUtils to check if the device is mobile
-    if (window.DeviceOrientationEvent && isMobile) {
-        window.addEventListener('deviceorientation', handleDeviceOrientation);
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchmove', handleTouchMove);
+      });
     } else {
-        window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mousemove', handleMouseMove);
     }
-
-    const createFloatingAnimation = (range) => {
-        return (element) => {
-            const animate = () => {
-                gsap.to(element, {
-                    x: gsap.utils.random(range.minX, range.maxX, true), // Random X within range
-                    y: gsap.utils.random(range.minY, range.maxY, true), // Random Y within range
-                    ease: 'sine.inOut',
-                    duration: gsap.utils.random(0.5, 2, true), // Randomized duration
-                    onComplete: animate, // Recursively restart the animation
-                });
-            };
-            animate(); // Start the animation
-        };
-    };
-
-    const floatingAnimation = createFloatingAnimation(settings.floatingAnimation);
-    floatingAnimation(crowdImage);
-
+  
+    window.addEventListener('resize', throttle(handleResize, 150));
+  
     return crowdScene;
-};
+  };

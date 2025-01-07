@@ -1,7 +1,7 @@
-import { navigateTo } from '../router';
-import getDeviceInfo from '../deviceUtils';
+import { navigateTo } from '../utils/router.js';
+import getDeviceInfo from '../utils/deviceUtils.js';
 import { gsap } from 'gsap';
-import { createFloatingAnimation } from '../floatingAnimation.js';
+import { createFloatingAnimation } from '../utils/floatingAnimation.js';
 import { initThreeScene } from '../threeScene.js';
 import { createCrowdScene } from '../components/crowdScene';
 import { createButton } from '../components/Button.js';

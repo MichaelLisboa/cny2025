@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { requestDeviceOrientation } from './handleIosPermissions';
+import { requestDeviceOrientation } from './utils/handleIosPermissions';
 
 // Parameters for camera and sphere settings
 const params = {
