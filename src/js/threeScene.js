@@ -4,51 +4,96 @@ import { requestDeviceOrientation } from './utils/handleIosPermissions';
 // Parameters for camera and sphere settings
 const params = {
   camera: {
-    position: { x: 0, y: -0.25, z: -2 },
-    lookAt: { x: 0, y: -0.5, z: -4 },
-    mobilePosition: { x: 0, y: -0.3, z: 0.1 },
-    mobileLookAt: { x: 0, y: -0.3, z: -4 },
-    maxTiltUp: Math.PI / 12,
-    maxTiltDown: -Math.PI / 8,
+    position: { x: 0, y: 1.5, z: 0.5 }, // Simulates human eye level
+    lookAt: { x: 0, y: 2, z: -2 }, // Tilt slightly upward
+    mobilePosition: { x: 0, y: 0.5, z: 0.1 }, // Adjusted for mobile
+    mobileLookAt: { x: 0, y: 1.5, z: -2 },
+    maxTiltUp: Math.PI / 6, // Limit upward tilt (11.25 degrees)
+    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-22.5 degrees)
   },
   texture: {
     repeat: { x: 3, y: 1 },
     offset: { x: 1, y: 0 },
   },
   sphere: {
-    scaleY: 0.5,
+    scaleY: 1,
     scaleX: 1,
-    initialRotationX: -Math.PI / 8,
+    initialRotationX: Math.PI / 8, // Adjusted for proper texture alignment
   },
 };
 
-export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
-  console.log('Initializing Three.js scene', isMobile, oS, browser);
-  // Initialize Three.js components
+// Add the moon as a separate object to the scene
+const addMoonToScene = (scene) => {
+  const moonTexture = new THREE.TextureLoader().load(
+    new URL('../assets/images/moon.png', import.meta.url).href
+  );
+
+  // const moonGeometry = new THREE.PlaneGeometry(200, 150);
+  // const moonMaterial = new THREE.MeshBasicMaterial({
+  //   map: moonTexture,
+  //   transparent: true,
+  //   depthTest: false,
+  // });
+  moonTexture.wrapS = THREE.RepeatWrapping;
+  moonTexture.wrapT = THREE.RepeatWrapping;
+  const moonGeometry = new THREE.SphereGeometry(100, 100, 32); // Radius and resolution
+  const moonMaterial = new THREE.MeshBasicMaterial({
+    map: moonTexture,
+    transparent: true,
+    depthTest: false,
+    roughness: 0.8,
+    metalness: 0.1,
+  });
+  
+
+  const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+  moon.scale.set(4, 4, 4); // Uniform scaling, no inversion
+  moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
+  moon.position.set(0, 1000, -2000); // High and far back
+  
+  // Add directional light for depth
+  const moonLight = new THREE.DirectionalLight(0xffffff, 1);
+  moonLight.castShadow = false;
+  moonLight.position.set(1000, 2000, -1000);
+  scene.add(moonLight);
+  
+  // Create a pivot point for rotation
+  const moonPivot = new THREE.Object3D();
+  moonPivot.position.set(0, 0, 0);
+  moonPivot.add(moon);
+  scene.add(moonPivot);
+
+  // Position the moon relative to the pivot
+  moonPivot.add(moon);
+
+  // Add the pivot to the scene
+  scene.add(moonPivot);
+  return moonPivot;
+};
+
+export const initThreeScene = (app, isMobile) => {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
-    70,
+    80, // Wider field of view for natural perspective
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    5000 // Increased far clipping plane
   );
 
   const renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
-  // renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.35;
   app.appendChild(renderer.domElement);
 
-  // Create and configure the sphere
+  // Create and configure the sky sphere
   const createSkySphere = () => {
     const sphereGeometry = new THREE.SphereGeometry(1000, 60, 40);
     const texture = new THREE.TextureLoader().load(
       new URL('../assets/images/starry-sky-background.png', import.meta.url).href
     );
 
-    // texture.encoding = THREE.sRGBEncoding;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.repeat.set(params.texture.repeat.x, params.texture.repeat.y);
@@ -60,7 +105,7 @@ export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
     });
 
     const skySphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    skySphere.rotation.x = Math.PI / 2 + params.sphere.initialRotationX;
+    skySphere.rotation.x = params.sphere.initialRotationX;
     skySphere.scale.y = params.sphere.scaleY;
     skySphere.scale.x = params.sphere.scaleX;
     return skySphere;
@@ -69,31 +114,21 @@ export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
   const skySphere = createSkySphere();
   scene.add(skySphere);
 
-  // Position the camera
+  // Add the moon
+  const moonPivot = addMoonToScene(scene);
+
+  // Setup camera
   const setupCamera = () => {
-    if (isMobile) {
-      camera.position.set(
-        params.camera.mobilePosition.x,
-        params.camera.mobilePosition.y,
-        params.camera.mobilePosition.z
-      );
-      camera.lookAt(
-        params.camera.mobileLookAt.x,
-        params.camera.mobileLookAt.y,
-        params.camera.mobileLookAt.z
-      );
-    } else {
-      camera.position.set(
-        params.camera.position.x,
-        params.camera.position.y,
-        params.camera.position.z
-      );
-      camera.lookAt(
-        params.camera.lookAt.x,
-        params.camera.lookAt.y,
-        params.camera.lookAt.z
-      );
-    }
+    camera.position.set(
+      params.camera.position.x,
+      params.camera.position.y,
+      params.camera.position.z
+    );
+    camera.lookAt(
+      params.camera.lookAt.x,
+      params.camera.lookAt.y,
+      params.camera.lookAt.z
+    );
   };
   setupCamera();
 
@@ -105,115 +140,44 @@ export const initThreeScene = (app, isMobile, oS, deviceType, browser) => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-    }, 150); // Throttle to 150ms
+    }, 150);
   });
 
-  // Variables for movement
+  // Input and animation
   let xRotation = 0;
   let yRotation = 0;
   let targetXRotation = 0;
   let targetYRotation = 0;
 
-  // Dead zone threshold for reducing shake
-  const threshold = 0.02; // Adjust as needed to filter minor shakes
-
-  // Smooth rotations using lerp
   const lerp = (start, end, alpha) => start + (end - start) * alpha;
 
-  // Calculate the shortest rotation path
-  const shortestPath = (current, target) => {
-    const delta = target - current;
-    if (delta > Math.PI) {
-      return current + (delta - 2 * Math.PI);
-    } else if (delta < -Math.PI) {
-      return current + (delta + 2 * Math.PI);
-    }
-    return target;
-  };
-
-  // Handle mouse and touch input
-  let lastTouchX = 0;
-  let lastTouchY = 0;
-
   const handleInput = (deltaX, deltaY) => {
-    targetXRotation += deltaX * 0.005; // Adjust sensitivity
+    targetXRotation += deltaX * 0.005;
     targetYRotation = Math.max(
       Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
       params.camera.maxTiltDown
     );
   };
 
-  // Mouse input
   window.addEventListener('mousemove', (event) => {
-    if (!isMobile) {
-      const deltaX = event.movementX || 0;
-      const deltaY = event.movementY || 0;
-      handleInput(deltaX, deltaY);
-    }
+    const deltaX = event.movementX || 0;
+    const deltaY = event.movementY || 0;
+    handleInput(deltaX, deltaY);
   });
 
-  // Touch input
-  window.addEventListener('touchmove', (event) => {
-    if (event.touches.length === 1) {
-      const touch = event.touches[0];
-      const deltaX = touch.clientX - lastTouchX;
-      const deltaY = touch.clientY - lastTouchY;
-      lastTouchX = touch.clientX;
-      lastTouchY = touch.clientY;
-      handleInput(deltaX, deltaY);
-    }
-  });
-
-  // Define the device orientation handler
-  const handleDeviceOrientation = (event) => {
-    if (event.alpha !== null) {
-      const alpha = (event.alpha / 180) * Math.PI;
-
-      // Smooth horizontal rotation (alpha)
-      if (Math.abs(alpha - targetXRotation) > threshold) {
-        targetXRotation = shortestPath(xRotation, alpha);
-      }
-
-      // Smooth vertical rotation (beta)
-      const betaRaw = (event.beta - 90) / 90; // Normalize beta to [-1, 1]
-      const beta = betaRaw * (params.camera.maxTiltUp - params.camera.maxTiltDown);
-
-      if (Math.abs(beta - targetYRotation) > threshold) {
-        targetYRotation = Math.max(
-          Math.min(-beta, params.camera.maxTiltUp),
-          params.camera.maxTiltDown
-        );
-      }
-    }
-  };
-
-  // Use the iOS permission handler
-  requestDeviceOrientation(() => {
-    console.log('Adding deviceorientation listener');
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-  });
-
-  // Animation loop with refined damping and smoothing
   const animate = () => {
-    const dampingFactorX = 0.3; // Horizontal damping factor
-    const dampingFactorY = 0.15; // Vertical damping factor (even smoother for vertical motions)
+    xRotation = lerp(xRotation, targetXRotation, 0.3);
+    yRotation = lerp(yRotation, targetYRotation, 0.15);
 
-    // Smoothly transition rotations
-    xRotation = lerp(xRotation, targetXRotation, dampingFactorX);
-
-    // Apply low-pass filtering to reduce jitter in yRotation
-    const smoothY = yRotation + (targetYRotation - yRotation) * dampingFactorY;
-    yRotation = Math.max(
-      Math.min(smoothY, params.camera.maxTiltUp),
-      params.camera.maxTiltDown
-    );
-
-    // Apply rotations to the sphere
     skySphere.rotation.y = xRotation;
     skySphere.rotation.x = yRotation;
+
+    moonPivot.rotation.y = xRotation;
+    moonPivot.rotation.x = yRotation;
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   };
+
   animate();
 };
