@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import getDeviceInfo from './utils/deviceUtils';
 import { requestDeviceOrientation } from './utils/handleIosPermissions';
 
 // Parameters for camera and sphere settings
@@ -21,6 +22,8 @@ const params = {
     initialRotationX: Math.PI / 8, // Adjusted for proper texture alignment
   },
 };
+
+const { isMobile } = getDeviceInfo();
 
 // Add the moon as a separate object to the scene
 const addMoonToScene = (scene) => {
@@ -50,6 +53,17 @@ const addMoonToScene = (scene) => {
   moon.scale.set(4, 4, 4); // Uniform scaling, no inversion
   moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
   moon.position.set(0, 1000, -2000); // High and far back
+
+
+
+  // Moon adjustments for mobile
+if (isMobile) {
+  moon.scale.set(6, 6, 6);
+  moon.position.set(0, 1200, -2500);
+} else {
+  moon.scale.set(4, 4, 4);
+  moon.position.set(0, 1000, -2000);
+}
   
   // Add directional light for depth
   const moonLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -159,30 +173,54 @@ export const initThreeScene = (app, isMobile) => {
     );
   };
 
-  const handleDeviceOrientation = (event) => {
-    if (event.alpha !== null) {
-      // Alpha: Rotation around Z-axis (0 to 360 degrees)
-      const alpha = (event.alpha / 180) * Math.PI; // Convert degrees to radians
-  
-      // Beta: Rotation around X-axis (-180 to 180 degrees)
-      const beta = (event.beta / 180) * Math.PI;
-  
-      // Gamma: Rotation around Y-axis (-90 to 90 degrees)
-      const gamma = (event.gamma / 90) * Math.PI;
-  
-      // Update target rotations based on device orientation
-      targetXRotation = alpha;
-      targetYRotation = Math.max(
-        Math.min(beta, params.camera.maxTiltUp),
-        params.camera.maxTiltDown
-      );
-    }
-  };
-  
-  // Request permission for device orientation (required on iOS)
-  requestDeviceOrientation(() => {
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-  });
+  // Device orientation handling
+const handleDeviceOrientation = (event) => {
+  if (event.alpha !== null) {
+    const alpha = (event.alpha / 180) * Math.PI; // Horizontal rotation
+    const beta = -(event.beta / 180) * Math.PI; // Inverted vertical tilt
+    const gamma = (event.gamma / 90) * Math.PI; // Rotation around Y-axis
+
+    targetXRotation = alpha;
+    targetYRotation = Math.max(
+      Math.min(beta, params.camera.maxTiltUp),
+      params.camera.maxTiltDown
+    );
+  }
+};
+
+// Touch gesture handling
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+window.addEventListener('touchstart', (event) => {
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+  }
+});
+
+window.addEventListener('touchmove', (event) => {
+  if (event.touches.length === 1) {
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - lastTouchX;
+    const deltaY = touch.clientY - lastTouchY;
+
+    targetXRotation += deltaX * 0.005;
+    targetYRotation = Math.max(
+      Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
+      params.camera.maxTiltDown
+    );
+
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+  }
+});
+
+// Attach the orientation listener
+requestDeviceOrientation(() => {
+  window.addEventListener('deviceorientation', handleDeviceOrientation);
+});
 
   window.addEventListener('mousemove', (event) => {
     const deltaX = event.movementX || 0;
