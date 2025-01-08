@@ -13,7 +13,7 @@ export const createCrowdScene = (container) => {
             desktopWidth: 2, // Multiplier for desktop relative to viewport
             mobileWidth: 4, // Multiplier for mobile relative to viewport
             minWidth: 1920, // Minimum width for large displays
-            maxWidth: 3840, // Maximum width for 4K displays
+            maxWidth: 5000, // Maximum width for 4K displays
             desktopBottom: '-1%',
             mobileBottom: '-1%',
         },
