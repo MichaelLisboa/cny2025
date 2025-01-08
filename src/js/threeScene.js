@@ -174,19 +174,41 @@ export const initThreeScene = (app, isMobile) => {
   };
 
   // Device orientation handling
-const handleDeviceOrientation = (event) => {
-  if (event.alpha !== null) {
-    const alpha = (event.alpha / 180) * Math.PI; // Horizontal rotation
-    const beta = -(event.beta / 180) * Math.PI; // Inverted vertical tilt
-    const gamma = (event.gamma / 90) * Math.PI; // Rotation around Y-axis
+  let lastAlpha = null;
 
-    targetXRotation = alpha;
-    targetYRotation = Math.max(
-      Math.min(beta, params.camera.maxTiltUp),
-      params.camera.maxTiltDown
-    );
-  }
-};
+  const handleDeviceOrientation = (event) => {
+    if (event.alpha !== null) {
+      const alpha = (event.alpha / 180) * Math.PI; // Convert alpha to radians
+  
+      // Calculate the shortest rotation path for alpha
+      if (lastAlpha !== null) {
+        const deltaAlpha = alpha - lastAlpha;
+  
+        // Handle wrapping around 0 and 360 degrees
+        if (deltaAlpha > Math.PI) {
+          targetXRotation -= 2 * Math.PI - deltaAlpha; // Counter-clockwise
+        } else if (deltaAlpha < -Math.PI) {
+          targetXRotation += 2 * Math.PI + deltaAlpha; // Clockwise
+        } else {
+          targetXRotation += deltaAlpha; // Normal incremental change
+        }
+      }
+  
+      lastAlpha = alpha;
+  
+      // Process beta (vertical tilt) as before
+      const beta = -(event.beta / 180) * Math.PI; // Inverted tilt
+      targetYRotation = Math.max(
+        Math.min(beta, params.camera.maxTiltUp),
+        params.camera.maxTiltDown
+      );
+    }
+  };
+  
+  // Attach the listener
+  requestDeviceOrientation(() => {
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+  });
 
 // Touch gesture handling
 let lastTouchX = 0;
@@ -229,8 +251,8 @@ requestDeviceOrientation(() => {
   });
 
   const animate = () => {
-    xRotation = lerp(xRotation, targetXRotation, 0.3);
-    yRotation = lerp(yRotation, targetYRotation, 0.15);
+    xRotation = lerp(xRotation, targetXRotation, 0.15); // Smooth transition
+yRotation = lerp(yRotation, targetYRotation, 0.1);
 
     skySphere.rotation.y = xRotation;
     skySphere.rotation.x = yRotation;
