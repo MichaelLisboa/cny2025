@@ -159,6 +159,31 @@ export const initThreeScene = (app, isMobile) => {
     );
   };
 
+  const handleDeviceOrientation = (event) => {
+    if (event.alpha !== null) {
+      // Alpha: Rotation around Z-axis (0 to 360 degrees)
+      const alpha = (event.alpha / 180) * Math.PI; // Convert degrees to radians
+  
+      // Beta: Rotation around X-axis (-180 to 180 degrees)
+      const beta = (event.beta / 180) * Math.PI;
+  
+      // Gamma: Rotation around Y-axis (-90 to 90 degrees)
+      const gamma = (event.gamma / 90) * Math.PI;
+  
+      // Update target rotations based on device orientation
+      targetXRotation = alpha;
+      targetYRotation = Math.max(
+        Math.min(beta, params.camera.maxTiltUp),
+        params.camera.maxTiltDown
+      );
+    }
+  };
+  
+  // Request permission for device orientation (required on iOS)
+  requestDeviceOrientation(() => {
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+  });
+
   window.addEventListener('mousemove', (event) => {
     const deltaX = event.movementX || 0;
     const deltaY = event.movementY || 0;
