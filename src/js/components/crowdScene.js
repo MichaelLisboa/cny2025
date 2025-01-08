@@ -83,6 +83,13 @@ export const createCrowdScene = (container) => {
         updateParallax(parallaxX);
     };
 
+    const handleDeviceOrientation = (event) => {
+        const maxShift = (imageWidth - window.innerWidth) * settings.parallax.maxShiftMultiplier;
+        const xShift = (event.gamma / 45) * maxShift;
+        parallaxX = xShift;
+        updateParallax(parallaxX);
+    };
+
     const handleResize = () => {
         imageWidth = calculateImageWidth();
 
@@ -95,7 +102,11 @@ export const createCrowdScene = (container) => {
     };
 
     // Attach event listeners
-    window.addEventListener('mousemove', handleMouseMove);
+    if (window.DeviceOrientationEvent && isMobile) {
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+    } else {
+        window.addEventListener('mousemove', handleMouseMove);
+    }
     window.addEventListener('resize', handleResize);
 
     return crowdScene;

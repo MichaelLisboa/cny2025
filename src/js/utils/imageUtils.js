@@ -6,6 +6,11 @@
  * @returns {string} - srcset string for <source>
  */
 
+const sizes = `(max-width: 480px) 80vw, 
+               (max-width: 768px) 80vw, 
+               (max-width: 1440px) 50vw, 
+               (max-width: 1920px) 60vw, 
+               (min-width: 1921px) 60vw`; // Tailored for responsive widths
 const breakpoints = [480, 768, 1024, 1440, 1920, 3840]; // Expected sizes generated during build
 
 const generateSrcset = (imageName, format, sizes) => {
@@ -33,6 +38,7 @@ export const createPictureElement = (imageNameWithExtension) => {
   const sourceWebP = document.createElement('source');
   sourceWebP.srcset = generateSrcset(name, 'webp', breakpoints);
   sourceWebP.type = 'image/webp';
+  sourceWebP.sizes = sizes;
   picture.appendChild(sourceWebP);
 
   // Add fallback <img> tag
