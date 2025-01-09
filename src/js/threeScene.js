@@ -6,11 +6,11 @@ import { requestDeviceOrientation } from './utils/handleIosPermissions';
 const params = {
   camera: {
     position: { x: 0, y: 1.5, z: 0.5 }, // Simulates human eye level
-    lookAt: { x: 0, y: 2, z: -2 }, // Tilt slightly upward
+    lookAt: { x: 0, y: 1, z: -2 }, // Tilt slightly upward
     mobilePosition: { x: 0, y: 0.5, z: 0.1 }, // Adjusted for mobile
-    mobileLookAt: { x: 0, y: 1.5, z: -2 },
-    maxTiltUp: Math.PI / 6, // Limit upward tilt (30 degrees)
-    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-7.5 degrees)
+    mobileLookAt: { x: 0, y: 0, z: -2 },
+    maxTiltUp: Math.PI / 32, // Limit upward tilt (30 degrees)
+    maxTiltDown: -Math.PI / 8, // Limit downward tilt (-7.5 degrees)
   },
   texture: {
     repeat: { x: 3, y: 1 },
@@ -31,7 +31,7 @@ const addMoonToScene = (scene) => {
     new URL('../assets/images/moon.png', import.meta.url).href
   );
 
-  const moonGeometry = new THREE.SphereGeometry(100, 100, 32); // Radius and resolution
+  const moonGeometry = new THREE.SphereGeometry(64, 64, 32); // Radius and resolution
   const moonMaterial = new THREE.MeshBasicMaterial({
     map: moonTexture,
     transparent: true,
@@ -41,17 +41,17 @@ const addMoonToScene = (scene) => {
   });
 
   const moon = new THREE.Mesh(moonGeometry, moonMaterial);
-  moon.scale.set(4, 4, 4); // Uniform scaling, no inversion
+  moon.scale.set(1, 1, 1); // Uniform scaling, no inversion
   moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
-  moon.position.set(0, 1000, -2000); // High and far back
+  // moon.position.set(0, 1000, -2000); // High and far back
 
   // Moon adjustments for mobile
   if (isMobile) {
     moon.scale.set(6, 6, 6);
-    moon.position.set(-300, 2800, -2500);
+    moon.position.set(-350, 650, -4500);
   } else {
     moon.scale.set(4, 4, 4);
-    moon.position.set(-1200, 1500, -2000);
+    moon.position.set(-800, 400, -2000);
   }
 
   // Add directional light for depth
@@ -87,7 +87,7 @@ export const initThreeScene = (app, isMobile) => {
 
   // Create and configure the sky sphere
   const createSkySphere = () => {
-    const sphereGeometry = new THREE.SphereGeometry(1000, 60, 40);
+    const sphereGeometry = new THREE.SphereGeometry(1500, 60, 40);
     const texture = new THREE.TextureLoader().load(
       new URL('../assets/images/starry-sky-background.png', import.meta.url).href
     );
