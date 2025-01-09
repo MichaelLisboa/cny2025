@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import getDeviceInfo from './utils/deviceUtils';
 import { requestDeviceOrientation } from './utils/handleIosPermissions';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 // Parameters for camera and sphere settings
 const params = {
@@ -65,6 +68,18 @@ const addMoonToScene = (scene) => {
   moonPivot.add(moon);
   scene.add(moonPivot);
 
+  // Use a lower opacity and NormalBlending for a subtler glow
+  const glowGeometry = new THREE.SphereGeometry(70, 64, 32);
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.05,
+    blending: THREE.NormalBlending,
+    side: THREE.BackSide,
+  });
+  const moonGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+  moonPivot.add(moonGlow);
+
   return moonPivot;
 };
 
@@ -81,8 +96,18 @@ export const initThreeScene = (app, isMobile) => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.35;
+  renderer.toneMappingExposure = 0.25;
   app.appendChild(renderer.domElement);
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.5, // strength
+    0.2, // radius
+    0.85 // threshold
+  );
+  composer.addPass(bloomPass);
 
   // Create and configure the sky sphere
   const createSkySphere = () => {
@@ -248,7 +273,7 @@ export const initThreeScene = (app, isMobile) => {
     skySphere.rotation.x = yRotation;
     moonPivot.rotation.y = xRotation;
     moonPivot.rotation.x = yRotation;
-    renderer.render(scene, camera);
+    composer.render();
     requestAnimationFrame(animate);
   };
   animate();
