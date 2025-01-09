@@ -9,8 +9,8 @@ const params = {
     lookAt: { x: 0, y: 1, z: -2 }, // Tilt slightly upward
     mobilePosition: { x: 0, y: 0.5, z: 0.1 }, // Adjusted for mobile
     mobileLookAt: { x: 0, y: 0, z: -2 },
-    maxTiltUp: Math.PI / 32, // Limit upward tilt (30 degrees)
-    maxTiltDown: -Math.PI / 8, // Limit downward tilt (-7.5 degrees)
+    maxTiltUp: Math.PI / 6, // Limit upward tilt (30 degrees)
+    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-7.5 degrees)
   },
   texture: {
     repeat: { x: 3, y: 1 },
@@ -194,7 +194,7 @@ export const initThreeScene = (app, isMobile) => {
       lastAlpha = alpha;
 
       // Process beta (vertical tilt) as before
-      const beta = -(event.beta / 180) * Math.PI; // Inverted tilt
+      const beta = (event.beta / 180) * Math.PI; // Inverted tilt
       targetYRotation = Math.max(
         Math.min(beta, params.camera.maxTiltUp),
         params.camera.maxTiltDown
