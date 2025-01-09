@@ -9,8 +9,8 @@ const params = {
     lookAt: { x: 0, y: 2, z: -2 }, // Tilt slightly upward
     mobilePosition: { x: 0, y: 0.5, z: 0.1 }, // Adjusted for mobile
     mobileLookAt: { x: 0, y: 1.5, z: -2 },
-    maxTiltUp: Math.PI / 6, // Limit upward tilt (11.25 degrees)
-    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-22.5 degrees)
+    maxTiltUp: Math.PI / 6, // Limit upward tilt (30 degrees)
+    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-7.5 degrees)
   },
   texture: {
     repeat: { x: 3, y: 1 },
@@ -31,14 +31,6 @@ const addMoonToScene = (scene) => {
     new URL('../assets/images/moon.png', import.meta.url).href
   );
 
-  // const moonGeometry = new THREE.PlaneGeometry(200, 150);
-  // const moonMaterial = new THREE.MeshBasicMaterial({
-  //   map: moonTexture,
-  //   transparent: true,
-  //   depthTest: false,
-  // });
-  moonTexture.wrapS = THREE.RepeatWrapping;
-  moonTexture.wrapT = THREE.RepeatWrapping;
   const moonGeometry = new THREE.SphereGeometry(100, 100, 32); // Radius and resolution
   const moonMaterial = new THREE.MeshBasicMaterial({
     map: moonTexture,
@@ -47,48 +39,40 @@ const addMoonToScene = (scene) => {
     roughness: 0.8,
     metalness: 0.1,
   });
-  
 
   const moon = new THREE.Mesh(moonGeometry, moonMaterial);
   moon.scale.set(4, 4, 4); // Uniform scaling, no inversion
   moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
   moon.position.set(0, 1000, -2000); // High and far back
 
-
-
   // Moon adjustments for mobile
-if (isMobile) {
-  moon.scale.set(6, 6, 6);
-  moon.position.set(0, 1200, -2500);
-} else {
-  moon.scale.set(4, 4, 4);
-  moon.position.set(0, 1000, -2000);
-}
-  
+  if (isMobile) {
+    moon.scale.set(6, 6, 6);
+    moon.position.set(-300, 2800, -2500);
+  } else {
+    moon.scale.set(4, 4, 4);
+    moon.position.set(-1200, 1500, -2000);
+  }
+
   // Add directional light for depth
   const moonLight = new THREE.DirectionalLight(0xffffff, 1);
   moonLight.castShadow = false;
   moonLight.position.set(1000, 2000, -1000);
   scene.add(moonLight);
-  
+
   // Create a pivot point for rotation
   const moonPivot = new THREE.Object3D();
   moonPivot.position.set(0, 0, 0);
   moonPivot.add(moon);
   scene.add(moonPivot);
 
-  // Position the moon relative to the pivot
-  moonPivot.add(moon);
-
-  // Add the pivot to the scene
-  scene.add(moonPivot);
   return moonPivot;
 };
 
 export const initThreeScene = (app, isMobile) => {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
-    80, // Wider field of view for natural perspective
+    60, // Wider field of view for natural perspective
     window.innerWidth / window.innerHeight,
     0.1,
     5000 // Increased far clipping plane
@@ -133,16 +117,29 @@ export const initThreeScene = (app, isMobile) => {
 
   // Setup camera
   const setupCamera = () => {
-    camera.position.set(
-      params.camera.position.x,
-      params.camera.position.y,
-      params.camera.position.z
-    );
-    camera.lookAt(
-      params.camera.lookAt.x,
-      params.camera.lookAt.y,
-      params.camera.lookAt.z
-    );
+    if (isMobile) {
+      camera.position.set(
+        params.camera.mobilePosition.x,
+        params.camera.mobilePosition.y,
+        params.camera.mobilePosition.z
+      );
+      camera.lookAt(
+        params.camera.mobileLookAt.x,
+        params.camera.mobileLookAt.y,
+        params.camera.mobileLookAt.z
+      );
+    } else {
+      camera.position.set(
+        params.camera.position.x,
+        params.camera.position.y,
+        params.camera.position.z
+      );
+      camera.lookAt(
+        params.camera.lookAt.x,
+        params.camera.lookAt.y,
+        params.camera.lookAt.z
+      );
+    }
   };
   setupCamera();
 
@@ -179,11 +176,11 @@ export const initThreeScene = (app, isMobile) => {
   const handleDeviceOrientation = (event) => {
     if (event.alpha !== null) {
       const alpha = (event.alpha / 180) * Math.PI; // Convert alpha to radians
-  
+
       // Calculate the shortest rotation path for alpha
       if (lastAlpha !== null) {
         const deltaAlpha = alpha - lastAlpha;
-  
+
         // Handle wrapping around 0 and 360 degrees
         if (deltaAlpha > Math.PI) {
           targetXRotation -= 2 * Math.PI - deltaAlpha; // Counter-clockwise
@@ -193,9 +190,9 @@ export const initThreeScene = (app, isMobile) => {
           targetXRotation += deltaAlpha; // Normal incremental change
         }
       }
-  
+
       lastAlpha = alpha;
-  
+
       // Process beta (vertical tilt) as before
       const beta = -(event.beta / 180) * Math.PI; // Inverted tilt
       targetYRotation = Math.max(
@@ -204,45 +201,40 @@ export const initThreeScene = (app, isMobile) => {
       );
     }
   };
-  
+
   // Attach the listener
   requestDeviceOrientation(() => {
     window.addEventListener('deviceorientation', handleDeviceOrientation);
   });
 
-// Touch gesture handling
-let lastTouchX = 0;
-let lastTouchY = 0;
+  // Touch gesture handling
+  let lastTouchX = 0;
+  let lastTouchY = 0;
 
-window.addEventListener('touchstart', (event) => {
-  if (event.touches.length === 1) {
-    const touch = event.touches[0];
-    lastTouchX = touch.clientX;
-    lastTouchY = touch.clientY;
-  }
-});
+  window.addEventListener('touchstart', (event) => {
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+    }
+  });
 
-window.addEventListener('touchmove', (event) => {
-  if (event.touches.length === 1) {
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - lastTouchX;
-    const deltaY = touch.clientY - lastTouchY;
+  window.addEventListener('touchmove', (event) => {
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      const deltaX = touch.clientX - lastTouchX;
+      const deltaY = touch.clientY - lastTouchY;
 
-    targetXRotation += deltaX * 0.005;
-    targetYRotation = Math.max(
-      Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
-      params.camera.maxTiltDown
-    );
+      targetXRotation += deltaX * 0.005;
+      targetYRotation = Math.max(
+        Math.min(targetYRotation + deltaY * 0.005, params.camera.maxTiltUp),
+        params.camera.maxTiltDown
+      );
 
-    lastTouchX = touch.clientX;
-    lastTouchY = touch.clientY;
-  }
-});
-
-// Attach the orientation listener
-requestDeviceOrientation(() => {
-  window.addEventListener('deviceorientation', handleDeviceOrientation);
-});
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+    }
+  });
 
   window.addEventListener('mousemove', (event) => {
     const deltaX = event.movementX || 0;
@@ -252,17 +244,13 @@ requestDeviceOrientation(() => {
 
   const animate = () => {
     xRotation = lerp(xRotation, targetXRotation, 0.15); // Smooth transition
-yRotation = lerp(yRotation, targetYRotation, 0.1);
-
+    yRotation = lerp(yRotation, targetYRotation, 0.1);
     skySphere.rotation.y = xRotation;
     skySphere.rotation.x = yRotation;
-
     moonPivot.rotation.y = xRotation;
     moonPivot.rotation.x = yRotation;
-
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   };
-
   animate();
 };
