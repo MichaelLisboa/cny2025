@@ -43,7 +43,6 @@ const addMoonToScene = (scene) => {
   const moon = new THREE.Mesh(moonGeometry, moonMaterial);
   moon.scale.set(1, 1, 1); // Uniform scaling, no inversion
   moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
-  // moon.position.set(0, 1000, -2000); // High and far back
 
   // Moon adjustments for mobile
   if (isMobile) {
@@ -194,7 +193,7 @@ export const initThreeScene = (app, isMobile) => {
       lastAlpha = alpha;
 
       // Process beta (vertical tilt) as before
-      const beta = (event.beta / 180) * Math.PI; // Inverted tilt
+      const beta = -(event.beta / 180) * Math.PI; // Inverted tilt
       targetYRotation = Math.max(
         Math.min(beta, params.camera.maxTiltUp),
         params.camera.maxTiltDown
