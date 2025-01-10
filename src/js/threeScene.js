@@ -8,13 +8,21 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 // Parameters for camera and sphere settings
 const params = {
   camera: {
-    position: { x: 0, y: 1.5, z: 0.5 }, // Simulates human eye level
-    lookAt: { x: 0, y: -1, z: -2 }, // Tilt slightly upward
-    mobilePosition: { x: 0, y: 0.75, z: 0.1 }, // Adjusted for mobile
-    mobileLookAt: { x: 0, y: 0.2, z: -2 },
-    maxTiltUp: Math.PI / 6, // Limit upward tilt (30 degrees)
-    maxTiltDown: -Math.PI / 24, // Limit downward tilt (-7.5 degrees)
+    position: { x: 0, y: 0, z: 0.5 }, // Simulates human eye level
+    lookAt: { x: 0, y: -0.5, z: -2 }, // Tilt slightly upward
+    mobilePosition: { x: 0, y: 0, z: 0.1 }, // Adjusted for mobile
+    mobileLookAt: { x: 0, y: -1, z: -2 },
+    maxTiltUp: Math.PI / 8, // Limit upward tilt (30 degrees)
+    maxTiltDown: -Math.PI / 4, // Limit downward tilt (-7.5 degrees)
   },
+  // camera: {
+  //   position: { x: 0, y: 1.5, z: 0.5 }, // Simulates human eye level
+  //   lookAt: { x: 0, y: 1, z: -2 }, // Tilt slightly upward
+  //   mobilePosition: { x: 0, y: 0.5, z: 0.1 }, // Adjusted for mobile
+  //   mobileLookAt: { x: 0, y: 0, z: -2 },
+  //   maxTiltUp: Math.PI / 6, // Limit upward tilt (30 degrees)
+  //   maxTiltDown: -Math.PI / 24, // Limit downward tilt (-7.5 degrees)
+  // },
   texture: {
     repeat: { x: 3, y: 1 },
     offset: { x: 1, y: 0 },
@@ -49,7 +57,7 @@ const addMoonToScene = (scene) => {
   // Moon adjustments for mobile
   if (isMobile) {
     moon.scale.set(6,6,1);
-    moon.position.set(-450, 850, -4500);
+    moon.position.set(-350, 750, -4500);
   } else {
     moon.scale.set(3, 2.5, 0);
     moon.position.set(-700, 700, -2000);
