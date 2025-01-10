@@ -39,7 +39,7 @@ const { isMobile } = getDeviceInfo();
 // Add the moon as a separate object to the scene
 const addMoonToScene = (scene) => {
   const moonTexture = new THREE.TextureLoader().load(
-    new URL('../assets/images/moon.png', import.meta.url).href
+    new URL('../assets/images/moon-original.webp', import.meta.url).href
   );
 
   const moonGeometry = new THREE.SphereGeometry(56, 56, 24); // Radius and resolution
@@ -57,7 +57,7 @@ const addMoonToScene = (scene) => {
   // Moon adjustments for mobile
   if (isMobile) {
     moon.scale.set(6,6,1);
-    moon.position.set(-350, 1250, -4500);
+    moon.position.set(-350, 1650, -4500);
   } else {
     moon.scale.set(3, 2.5, 0);
     moon.position.set(-700, 700, -2000);
@@ -120,7 +120,7 @@ export const initThreeScene = (app, isMobile) => {
   const createSkySphere = () => {
     const sphereGeometry = new THREE.SphereGeometry(1500, 60, 40);
     const texture = new THREE.TextureLoader().load(
-      new URL('../assets/images/starry-sky-background.png', import.meta.url).href
+      new URL('../assets/images/starry-sky-background-original.webp', import.meta.url).href
     );
 
     texture.wrapS = THREE.RepeatWrapping;
