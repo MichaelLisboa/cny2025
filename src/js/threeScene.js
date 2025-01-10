@@ -34,7 +34,7 @@ const addMoonToScene = (scene) => {
     new URL('../assets/images/moon.png', import.meta.url).href
   );
 
-  const moonGeometry = new THREE.SphereGeometry(64, 64, 32); // Radius and resolution
+  const moonGeometry = new THREE.SphereGeometry(56, 56, 24); // Radius and resolution
   const moonMaterial = new THREE.MeshBasicMaterial({
     map: moonTexture,
     transparent: true,
@@ -44,16 +44,15 @@ const addMoonToScene = (scene) => {
   });
 
   const moon = new THREE.Mesh(moonGeometry, moonMaterial);
-  moon.scale.set(1, 1, 1); // Uniform scaling, no inversion
-  moon.rotation.x = -Math.PI / 6; // Aggressive forward tilt
+  moon.rotation.x = Math.PI / 6; // Aggressive forward tilt
 
   // Moon adjustments for mobile
   if (isMobile) {
-    moon.scale.set(6, 6, 6);
-    moon.position.set(-350, 650, -4500);
+    moon.scale.set(6,6,1);
+    moon.position.set(-350, 750, -4500);
   } else {
-    moon.scale.set(4, 4, 4);
-    moon.position.set(-800, 400, -2000);
+    moon.scale.set(3, 2.5, 0);
+    moon.position.set(-700, 700, -2000);
   }
 
   // Add directional light for depth
@@ -86,7 +85,7 @@ const addMoonToScene = (scene) => {
 export const initThreeScene = (app, isMobile) => {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(
-    60, // Wider field of view for natural perspective
+    80, // Wider field of view for natural perspective
     window.innerWidth / window.innerHeight,
     0.1,
     5000 // Increased far clipping plane
@@ -105,7 +104,7 @@ export const initThreeScene = (app, isMobile) => {
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     0.5, // strength
     0.2, // radius
-    0.85 // threshold
+    0.8 // threshold
   );
   composer.addPass(bloomPass);
 
