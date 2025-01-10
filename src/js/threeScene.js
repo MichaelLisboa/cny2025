@@ -57,7 +57,7 @@ const addMoonToScene = (scene) => {
   // Moon adjustments for mobile
   if (isMobile) {
     moon.scale.set(6,6,1);
-    moon.position.set(-350, 950, -4500);
+    moon.position.set(-350, 1250, -4500);
   } else {
     moon.scale.set(3, 2.5, 0);
     moon.position.set(-700, 700, -2000);
