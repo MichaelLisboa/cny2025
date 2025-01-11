@@ -102,7 +102,7 @@ function loadMoon(isMobile) {
     });
 
     const moon = new THREE.Mesh(geometry, material);
-    moon.position.set(20, 15, -50); // Adjusted height
+    moon.position.set(-10, 15, -50); // Adjusted height
     moon.receiveShadow = true;
     return moon;
 }
