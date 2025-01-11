@@ -38,56 +38,74 @@ const { isMobile } = getDeviceInfo();
 
 // Add the moon as a separate object to the scene
 const addMoonToScene = (scene) => {
+  // Load the moon texture and normal map
   const moonTexture = new THREE.TextureLoader().load(
-    new URL('../assets/images/moon-original.webp', import.meta.url).href
+    new URL('../assets/images/moon.jpg', import.meta.url).href
+  );
+  const moonNormalMap = new THREE.TextureLoader().load(
+    new URL('../assets/images/moon_normal.jpg', import.meta.url).href
   );
 
-  const moonGeometry = new THREE.SphereGeometry(56, 56, 24); // Radius and resolution
-  const moonMaterial = new THREE.MeshBasicMaterial({
+  // Create high-resolution sphere geometry
+  const moonGeometry = new THREE.SphereGeometry(100, 64, 64);
+
+  // Use a standard material for the moon with a normal map
+  const moonMaterial = new THREE.MeshStandardMaterial({
     map: moonTexture,
-    transparent: true,
-    depthTest: false,
-    roughness: 0.8,
-    metalness: 0.1,
+    normalMap: moonNormalMap, // Adds depth to craters
+    roughness: 0.6, // Matte finish for realism
+    metalness: 0.0, // No metallic sheen
   });
 
+  // Create the moon mesh
   const moon = new THREE.Mesh(moonGeometry, moonMaterial);
-  moon.rotation.x = Math.PI / 6; // Aggressive forward tilt
+  moon.rotation.x = Math.PI / 6; // Slight tilt for visual interest
 
-  // Moon adjustments for mobile
+  // Create a pivot for the moon
+  const moonPivot = new THREE.Object3D();
+  scene.add(moonPivot); // Add pivot to the scene
+  moonPivot.add(moon); // Add the moon to the pivot
+
+  // Position the moon relative to the pivot
   if (isMobile) {
-    moon.scale.set(6,6,1);
-    moon.position.set(-350, 2000, -4500);
+    moon.position.set(-350, 2000, -4500); // Mobile position
+    moon.scale.set(1.5, 1.5, 1.5); // Mobile scale
   } else {
-    moon.scale.set(3, 2.5, 0);
-    moon.position.set(-700, 700, -2000);
+    moon.position.set(-700, 700, -2000); // Desktop position
+    moon.scale.set(2, 2, 2); // Desktop scale
   }
 
-  // Add directional light for depth
-  const moonLight = new THREE.DirectionalLight(0xffffff, 1);
-  moonLight.castShadow = false;
-  moonLight.position.set(1000, 2000, -1000);
-  scene.add(moonLight);
-
-  // Create a pivot point for rotation
-  const moonPivot = new THREE.Object3D();
-  moonPivot.position.set(0, 0, 0);
-  moonPivot.add(moon);
-  scene.add(moonPivot);
-
-  // Use a lower opacity and NormalBlending for a subtler glow
-  const glowGeometry = new THREE.SphereGeometry(70, 64, 32);
+  // Add a glow effect around the moon
+  const glowGeometry = new THREE.SphereGeometry(115, 72, 72); // Slightly larger than the moon
   const glowMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+    color: 0xffffcc, // Pale yellow glow
     transparent: true,
-    opacity: 0.05,
-    blending: THREE.NormalBlending,
-    side: THREE.BackSide,
+    opacity: 0.3, // Glow visibility
+    side: THREE.BackSide, // Only visible from the outside
+    depthWrite: false, // Avoid depth conflicts
   });
-  const moonGlow = new THREE.Mesh(glowGeometry, glowMaterial);
-  moonPivot.add(moonGlow);
 
-  return moonPivot;
+  const moonGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+  moon.add(moonGlow); // Attach glow to the moon
+  moonGlow.renderOrder = 1; // Ensure glow renders first
+
+  // Add ambient light for general illumination
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Softer ambient light
+  scene.add(ambientLight);
+
+  // Add a directional light to simulate sunlight
+  const sunlight = new THREE.DirectionalLight(0xffffff, 1.5); // Simulate sunlight
+  sunlight.position.set(1000, 1000, -1000); // Sun position
+  sunlight.castShadow = false; // Shadows not needed
+  scene.add(sunlight);
+
+  // Function to rotate the moon pivot with the scene
+  const animateMoon = (xRotation, yRotation) => {
+    moonPivot.rotation.y = xRotation; // Rotate horizontally
+    moonPivot.rotation.x = yRotation; // Rotate vertically
+  };
+
+  return { moonPivot, animateMoon };
 };
 
 export const initThreeScene = (app, isMobile) => {
@@ -142,9 +160,6 @@ export const initThreeScene = (app, isMobile) => {
 
   const skySphere = createSkySphere();
   scene.add(skySphere);
-
-  // Add the moon
-  const moonPivot = addMoonToScene(scene);
 
   // Setup camera
   const setupCamera = () => {
@@ -273,15 +288,23 @@ export const initThreeScene = (app, isMobile) => {
     handleInput(deltaX, deltaY);
   });
 
-  const animate = () => {
-    xRotation = lerp(xRotation, targetXRotation, 0.15); // Smooth transition
-    yRotation = lerp(yRotation, targetYRotation, 0.1);
-    skySphere.rotation.y = xRotation;
-    skySphere.rotation.x = yRotation;
-    moonPivot.rotation.y = xRotation;
-    moonPivot.rotation.x = yRotation;
-    composer.render();
-    requestAnimationFrame(animate);
-  };
-  animate();
+  const { moonPivot, animateMoon } = addMoonToScene(scene);
+
+const animate = () => {
+  // Smoothly interpolate rotations
+  xRotation = lerp(xRotation, targetXRotation, 0.15);
+  yRotation = lerp(yRotation, targetYRotation, 0.1);
+
+  // Rotate the sky sphere
+  skySphere.rotation.y = xRotation;
+  skySphere.rotation.x = yRotation;
+
+  // Synchronize the moon's pivot with the scene
+  animateMoon(xRotation, yRotation);
+
+  // Render the scene
+  composer.render();
+  requestAnimationFrame(animate);
+};
+animate();
 };

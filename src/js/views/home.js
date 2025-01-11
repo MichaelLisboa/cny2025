@@ -3,7 +3,7 @@ import getDeviceInfo from '../utils/deviceUtils.js';
 import { createPictureElement } from '../utils/imageUtils.js';
 import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../utils/floatingAnimation.js';
-import { initThreeScene } from '../threeScene.js';
+import threeSkyScene from '../threeSkyScene.js';
 import { createCrowdScene } from '../components/crowdScene';
 import { createButton } from '../components/Button.js';
 
@@ -81,7 +81,7 @@ export const home = () => {
     }, false);
 
     // Initialize the Three.js scene
-    initThreeScene(mainContainer, isMobile, oS, deviceType, browser); // Pass app & isMobile as needed
+    threeSkyScene(mainContainer, isMobile, oS, deviceType, browser); // Pass app & isMobile as needed
 
     // Create the crowd scene
     createCrowdScene(mainContainer);
