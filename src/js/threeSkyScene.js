@@ -139,41 +139,52 @@ export default function threeSkyScene(app, isMobile) {
     const maxTiltDown = isMobile ? cameraParams.mobile.maxTiltDown : cameraParams.desktop.maxTiltDown;
 
     let targetRotationX = 0;
-let targetRotationY = 0;
-let lastAlpha = null; // Declare and initialize lastAlpha here
+    let targetRotationY = 0;
+    let lastAlpha = null;
 
-const handleDeviceOrientation = (event) => {
-    if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
-        const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation
-        const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt
+    // Smoothing factors
+    const smoothingFactor = 0.075; // Adjust for responsiveness
+    const noiseThreshold = THREE.MathUtils.degToRad(0.5); // Ignore changes below 0.5 degrees
 
-        // Calculate the shortest rotation path for alpha (yaw)
-        if (lastAlpha !== null) {
-            let deltaAlpha = alpha - lastAlpha;
+    const handleDeviceOrientation = (event) => {
+        if (event.alpha !== null && event.beta !== null) {
+            const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation
+            const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt
 
-            // Handle wrapping around 0 and 360 degrees
-            if (deltaAlpha > Math.PI) {
-                deltaAlpha -= 2 * Math.PI;
-            } else if (deltaAlpha < -Math.PI) {
-                deltaAlpha += 2 * Math.PI;
+            if (lastAlpha !== null) {
+                let deltaAlpha = alpha - lastAlpha;
+
+                // Handle wrapping around 0 and 360 degrees
+                if (deltaAlpha > Math.PI) {
+                    deltaAlpha -= 2 * Math.PI;
+                } else if (deltaAlpha < -Math.PI) {
+                    deltaAlpha += 2 * Math.PI;
+                }
+
+                // Apply smoothing and thresholding
+                if (Math.abs(deltaAlpha) > noiseThreshold) {
+                    targetRotationY += deltaAlpha * smoothingFactor;
+                }
             }
 
-            targetRotationY += deltaAlpha; // Accumulate horizontal rotation
+            lastAlpha = alpha; // Update lastAlpha for the next frame
+
+            // Clamp beta (vertical tilt) to max/min tilt parameters
+            const clampedBeta = Math.max(
+                Math.min(beta - Math.PI / 2, maxTiltUp),
+                maxTiltDown
+            );
+
+            // Apply smoothing and ignore minor changes
+            if (Math.abs(clampedBeta - targetRotationX) > noiseThreshold) {
+                targetRotationX += (clampedBeta - targetRotationX) * smoothingFactor;
+            }
+
+            // Optional Debugging Logs
+            console.log(`Alpha: ${event.alpha}, Beta: ${event.beta}`);
+            console.log(`Target X Rotation: ${targetRotationX}, Target Y Rotation: ${targetRotationY}`);
         }
-
-        lastAlpha = alpha; // Update lastAlpha after use
-
-        // Clamp beta (vertical tilt) to max/min tilt parameters
-        targetRotationX = Math.max(
-            Math.min(beta - Math.PI / 2, maxTiltUp),
-            maxTiltDown
-        );
-
-        // Optional Debugging Logs
-        console.log(`Alpha: ${event.alpha}, Beta: ${event.beta}`);
-        console.log(`Target X Rotation: ${targetRotationX}, Target Y Rotation: ${targetRotationY}`);
-    }
-};
+    };
 
     const limitVerticalTilt = () => {
         if (targetRotationX > maxTiltUp) targetRotationX = maxTiltUp;
