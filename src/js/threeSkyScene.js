@@ -142,10 +142,11 @@ export default function threeSkyScene(app, isMobile) {
     let targetRotationY = 0;
     let lastAlpha = null;
 
-    // Smoothing factors
-    const dampingFactor = 0.1; // How quickly the rotation adjusts (lower = smoother)
+    // Smoothing and sensitivity factors
+    const dampingFactor = 0.2; // Adjust for responsiveness
     const alphaNoiseThreshold = THREE.MathUtils.degToRad(0.5); // Horizontal movement threshold
     const betaNoiseThreshold = THREE.MathUtils.degToRad(0.3);  // Vertical movement threshold
+    const rotationSpeedFactor = 1.5; // Adjust this to control sensitivity for 360-degree turns
 
     const handleDeviceOrientation = (event) => {
         if (event.alpha !== null && event.beta !== null) {
@@ -163,9 +164,10 @@ export default function threeSkyScene(app, isMobile) {
                     deltaAlpha += 2 * Math.PI;
                 }
 
-                // Apply damping and ignore noise
+                // Apply rotation speed factor and smoothing
                 if (Math.abs(deltaAlpha) > alphaNoiseThreshold) {
-                    targetRotationY += deltaAlpha * dampingFactor;
+                    targetRotationY += deltaAlpha * rotationSpeedFactor; // Adjust for sensitivity
+                    targetRotationY += deltaAlpha * dampingFactor;       // Smooth the motion
                 }
             }
 
