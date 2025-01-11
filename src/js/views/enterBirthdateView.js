@@ -1,8 +1,9 @@
+import { createDatePicker } from "../components/DatePicker";
+
 export const enterBirthdateView = () => {
     const container = document.createElement("div");
     Object.assign(container.style, {
         display: "flex",
-        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
@@ -11,6 +12,18 @@ export const enterBirthdateView = () => {
         boxSizing: "border-box",
         color: "#ffffff", // Text color
         textAlign: "center",
+    });
+
+    // Content Container
+    const contentContainer = document.createElement("div");
+    Object.assign(contentContainer.style, {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        maxWidth: "400px",
+        padding: "20px",
+        boxSizing: "border-box",
     });
 
     // Title
@@ -37,24 +50,12 @@ export const enterBirthdateView = () => {
         flexDirection: "column",
         alignItems: "center",
         width: "100%",
-        maxWidth: "400px",
+        position: "relative", // Ensure the date picker can be positioned relative to this container
     });
 
-    // Input Field
-    const input = document.createElement("input");
-    Object.assign(input.style, {
-        width: "100%",
-        padding: "10px",
-        border: "1px solid #ffffff",
-        borderRadius: "5px",
-        backgroundColor: "transparent",
-        color: "#ffffff",
-        fontSize: "1rem",
-        textAlign: "center",
-        marginBottom: "20px",
-    });
-    input.setAttribute("type", "text");
-    input.setAttribute("placeholder", "Enter birthday here");
+    // Create and append the datePicker on load
+    const datePicker = createDatePicker();
+    inputContainer.appendChild(datePicker);
 
     // Next Button
     const nextButton = document.createElement("button");
@@ -68,14 +69,17 @@ export const enterBirthdateView = () => {
         fontSize: "1rem",
         fontWeight: "bold",
         cursor: "pointer",
+        marginTop: "20px", // Add some space between the date picker and the button
     });
 
-    // Append elements
-    inputContainer.appendChild(input);
-    inputContainer.appendChild(nextButton);
-    container.appendChild(title);
-    container.appendChild(subtitle);
-    container.appendChild(inputContainer);
+    // Append elements to content container
+    contentContainer.appendChild(title);
+    contentContainer.appendChild(subtitle);
+    contentContainer.appendChild(inputContainer);
+    contentContainer.appendChild(nextButton);
+
+    // Append content container to main container
+    container.appendChild(contentContainer);
 
     // Return the view
     return container;
