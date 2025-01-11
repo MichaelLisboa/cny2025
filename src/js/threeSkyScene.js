@@ -108,6 +108,14 @@ function loadMoon(isMobile) {
     return moon;
 }
 
+function handleDeviceOrientation(event) {
+    if (event.alpha && event.beta && event.gamma) {
+        targetRotationX = THREE.MathUtils.degToRad(event.beta - 90);
+        targetRotationY = THREE.MathUtils.degToRad(event.alpha);
+        limitVerticalTilt();
+    }
+}
+
 export default function threeSkyScene(app, isMobile) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -148,13 +156,7 @@ export default function threeSkyScene(app, isMobile) {
     };
 
     if (isMobile) {
-        window.addEventListener('deviceorientation', (event) => {
-            if (event.alpha && event.beta && event.gamma) {
-                targetRotationX = THREE.MathUtils.degToRad(event.beta - 90);
-                targetRotationY = THREE.MathUtils.degToRad(event.alpha);
-                limitVerticalTilt();
-            }
-        });
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
 
         // Add gesture handling
         let lastTouchX = 0;
