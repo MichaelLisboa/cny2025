@@ -24,15 +24,15 @@ const cameraParams = {
         fov: 80,
         position: { x: 0, y: 1.5, z: 0 },
         lookAt: { x: 0, y: 0.5, z: -50 },
-        maxTiltUp: THREE.MathUtils.degToRad(15), // ~20 degrees up
-        maxTiltDown: THREE.MathUtils.degToRad(-30)
+        maxTiltUp: THREE.MathUtils.degToRad(15),
+        maxTiltDown: THREE.MathUtils.degToRad(-30),
     },
     mobile: {
         fov: 60,
         position: { x: 0, y: 4.5, z: 0 },
         lookAt: { x: 0, y: 8, z: -40 },
-        maxTiltUp: THREE.MathUtils.degToRad(15), // ~22.5 degrees up
-        maxTiltDown: THREE.MathUtils.degToRad(-30) // ~22.5 degrees down
+        maxTiltUp: THREE.MathUtils.degToRad(15),
+        maxTiltDown: THREE.MathUtils.degToRad(-30),
     },
 };
 
@@ -102,7 +102,7 @@ function loadMoon(isMobile) {
     });
 
     const moon = new THREE.Mesh(geometry, material);
-    moon.position.set(20, 10, -50);
+    moon.position.set(20, 15, -50); // Adjusted height
     moon.receiveShadow = true;
     return moon;
 }
@@ -157,7 +157,6 @@ export default function threeSkyScene(app, isMobile) {
     if (isMobile) {
         window.addEventListener('deviceorientation', handleDeviceOrientation);
 
-        // Add gesture handling
         let lastTouchX = 0;
         let lastTouchY = 0;
         window.addEventListener('touchstart', (event) => {
