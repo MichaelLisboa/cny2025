@@ -143,7 +143,7 @@ export default function threeSkyScene(app, isMobile) {
     let lastAlpha = null;
 
     // Smoothing factors
-    const smoothingFactor = 0.075; // Adjust for responsiveness
+    const smoothingFactor = 0.9; // Adjust for responsiveness
     const noiseThreshold = THREE.MathUtils.degToRad(0.5); // Ignore changes below 0.5 degrees
 
     const handleDeviceOrientation = (event) => {
