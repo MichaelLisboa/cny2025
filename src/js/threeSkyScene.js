@@ -143,46 +143,44 @@ export default function threeSkyScene(app, isMobile) {
     let lastAlpha = null;
 
     // Smoothing factors
-    const smoothingFactor = 0.9; // Adjust for responsiveness
-    const noiseThreshold = THREE.MathUtils.degToRad(0.5); // Ignore changes below 0.5 degrees
+    const dampingFactor = 0.1; // How quickly the rotation adjusts (lower = smoother)
+    const alphaNoiseThreshold = THREE.MathUtils.degToRad(0.5); // Horizontal movement threshold
+    const betaNoiseThreshold = THREE.MathUtils.degToRad(0.3);  // Vertical movement threshold
 
     const handleDeviceOrientation = (event) => {
         if (event.alpha !== null && event.beta !== null) {
-            const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation
-            const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt
+            const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation (Y-axis)
+            const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt (X-axis)
 
+            // Handle horizontal (alpha)
             if (lastAlpha !== null) {
                 let deltaAlpha = alpha - lastAlpha;
 
-                // Handle wrapping around 0 and 360 degrees
+                // Wrap-around correction for alpha
                 if (deltaAlpha > Math.PI) {
                     deltaAlpha -= 2 * Math.PI;
                 } else if (deltaAlpha < -Math.PI) {
                     deltaAlpha += 2 * Math.PI;
                 }
 
-                // Apply smoothing and thresholding
-                if (Math.abs(deltaAlpha) > noiseThreshold) {
-                    targetRotationY += deltaAlpha * smoothingFactor;
+                // Apply damping and ignore noise
+                if (Math.abs(deltaAlpha) > alphaNoiseThreshold) {
+                    targetRotationY += deltaAlpha * dampingFactor;
                 }
             }
 
             lastAlpha = alpha; // Update lastAlpha for the next frame
 
-            // Clamp beta (vertical tilt) to max/min tilt parameters
+            // Handle vertical tilt (beta)
             const clampedBeta = Math.max(
-                Math.min(beta - Math.PI / 2, maxTiltUp),
-                maxTiltDown
+                Math.min(beta - Math.PI / 2, maxTiltUp), // Clamp to maxTiltUp
+                maxTiltDown                             // Clamp to maxTiltDown
             );
 
-            // Apply smoothing and ignore minor changes
-            if (Math.abs(clampedBeta - targetRotationX) > noiseThreshold) {
-                targetRotationX += (clampedBeta - targetRotationX) * smoothingFactor;
+            // Smoothly adjust vertical tilt and ignore minor noise
+            if (Math.abs(clampedBeta - targetRotationX) > betaNoiseThreshold) {
+                targetRotationX += (clampedBeta - targetRotationX) * dampingFactor;
             }
-
-            // Optional Debugging Logs
-            console.log(`Alpha: ${event.alpha}, Beta: ${event.beta}`);
-            console.log(`Target X Rotation: ${targetRotationX}, Target Y Rotation: ${targetRotationY}`);
         }
     };
 
