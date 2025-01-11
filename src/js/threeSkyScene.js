@@ -138,22 +138,20 @@ export default function threeSkyScene(app, isMobile) {
     const maxTiltUp = isMobile ? cameraParams.mobile.maxTiltUp : cameraParams.desktop.maxTiltUp;
     const maxTiltDown = isMobile ? cameraParams.mobile.maxTiltDown : cameraParams.desktop.maxTiltDown;
 
-    let targetRotationX = 0;
-    let targetRotationY = 0;
+    let targetRotationX = 0; // Vertical tilt (X-axis)
+    let targetRotationY = 0; // Horizontal rotation (Y-axis)
     let lastAlpha = null;
 
     // Smoothing and sensitivity factors
-    const dampingFactor = 0.2; // Adjust for responsiveness
-    const alphaNoiseThreshold = THREE.MathUtils.degToRad(0.5); // Horizontal movement threshold
-    const betaNoiseThreshold = THREE.MathUtils.degToRad(0.3);  // Vertical movement threshold
-    const rotationSpeedFactor = 1.5; // Adjust this to control sensitivity for 360-degree turns
+    const dampingFactor = 0.15; // Smooth transitions
+    const alphaNoiseThreshold = THREE.MathUtils.degToRad(0.3); // Horizontal sensitivity
+    const betaNoiseThreshold = THREE.MathUtils.degToRad(0.2);  // Vertical sensitivity
+    const rotationSpeedFactor = 1.2; // For large rotations
 
     const handleDeviceOrientation = (event) => {
         if (event.alpha !== null && event.beta !== null) {
+            // Horizontal Rotation (Y-axis - alpha)
             const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation (Y-axis)
-            const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt (X-axis)
-
-            // Handle horizontal (alpha)
             if (lastAlpha !== null) {
                 let deltaAlpha = alpha - lastAlpha;
 
@@ -164,22 +162,22 @@ export default function threeSkyScene(app, isMobile) {
                     deltaAlpha += 2 * Math.PI;
                 }
 
-                // Apply rotation speed factor and smoothing
+                // Apply smoothing and threshold for alpha (Y-axis)
                 if (Math.abs(deltaAlpha) > alphaNoiseThreshold) {
-                    targetRotationY += deltaAlpha * rotationSpeedFactor; // Adjust for sensitivity
+                    targetRotationY += deltaAlpha * rotationSpeedFactor; // Sensitivity for large rotations
                     targetRotationY += deltaAlpha * dampingFactor;       // Smooth the motion
                 }
             }
-
             lastAlpha = alpha; // Update lastAlpha for the next frame
 
-            // Handle vertical tilt (beta)
+            // Vertical Tilt (X-axis - beta)
+            const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt (X-axis)
             const clampedBeta = Math.max(
-                Math.min(beta - Math.PI / 2, maxTiltUp), // Clamp to maxTiltUp
-                maxTiltDown                             // Clamp to maxTiltDown
+                Math.min(beta - Math.PI / 2, maxTiltUp), // Clamp to max limits
+                maxTiltDown
             );
 
-            // Smoothly adjust vertical tilt and ignore minor noise
+            // Apply smoothing and threshold for beta (X-axis)
             if (Math.abs(clampedBeta - targetRotationX) > betaNoiseThreshold) {
                 targetRotationX += (clampedBeta - targetRotationX) * dampingFactor;
             }
