@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import getDeviceInfo from './utils/deviceUtils';
 import { requestDeviceOrientation } from './utils/handleIosPermissions';
 
 function setupPostProcessing(renderer, scene, camera) {
@@ -22,7 +21,7 @@ function setupPostProcessing(renderer, scene, camera) {
 
 const cameraParams = {
     desktop: {
-        fov: 75,
+        fov: 80,
         position: { x: 0, y: 1.5, z: 0 },
         lookAt: { x: 0, y: 0.5, z: -50 },
         maxTiltUp: THREE.MathUtils.degToRad(15), // ~20 degrees up
@@ -75,7 +74,7 @@ function loadStarrySky(isMobile) {
     const geometry = new THREE.SphereGeometry(skyRadius, 64, 64);
     const textureLoader = new THREE.TextureLoader();
 
-    const starrySkyTexture = textureLoader.load(new URL('../assets/images/starry-sky-background-original.webp', import.meta.url).href);
+    const starrySkyTexture = textureLoader.load(new URL('../assets/images/equirectangular_starry_sky.webp', import.meta.url).href);
     starrySkyTexture.encoding = THREE.sRGBEncoding;
     const material = new THREE.MeshBasicMaterial({
         map: starrySkyTexture,
@@ -91,7 +90,7 @@ function loadMoon(isMobile) {
     const geometry = new THREE.SphereGeometry(moonRadius, 64, 64);
 
     const textureLoader = new THREE.TextureLoader();
-    const moonTexture = textureLoader.load(new URL('../assets/images/moon.jpg', import.meta.url).href);
+    const moonTexture = textureLoader.load(new URL('../assets/images/moon.webp', import.meta.url).href);
     moonTexture.encoding = THREE.sRGBEncoding;
     moonTexture.anisotropy = 16;
     const material = new THREE.MeshStandardMaterial({
