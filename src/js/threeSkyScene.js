@@ -107,13 +107,40 @@ function loadMoon(isMobile) {
     return moon;
 }
 
-function handleDeviceOrientation(event) {
-    if (event.alpha && event.beta && event.gamma) {
-        targetRotationX = THREE.MathUtils.degToRad(event.beta - 90);
-        targetRotationY = THREE.MathUtils.degToRad(event.alpha);
-        limitVerticalTilt();
+const handleDeviceOrientation = (event) => {
+    if (event.alpha !== null && event.beta !== null && event.gamma !== null) {
+        // Convert alpha, beta, and gamma to radians
+        const alpha = THREE.MathUtils.degToRad(event.alpha); // Horizontal rotation
+        const beta = THREE.MathUtils.degToRad(event.beta);   // Vertical tilt
+        const gamma = THREE.MathUtils.degToRad(event.gamma); // Side tilt (not used directly)
+
+        // Calculate the shortest rotation path for alpha (yaw)
+        if (lastAlpha !== null) {
+            let deltaAlpha = alpha - lastAlpha;
+
+            // Handle wrapping around 0 and 360 degrees
+            if (deltaAlpha > Math.PI) {
+                deltaAlpha -= 2 * Math.PI;
+            } else if (deltaAlpha < -Math.PI) {
+                deltaAlpha += 2 * Math.PI;
+            }
+
+            targetRotationY += deltaAlpha; // Accumulate horizontal rotation
+        }
+
+        lastAlpha = alpha;
+
+        // Process beta (vertical tilt), clamping to max/min tilt parameters
+        targetRotationX = Math.max(
+            Math.min(beta - Math.PI / 2, maxTiltUp), // Clamp beta to max tilt up
+            maxTiltDown               // Clamp beta to max tilt down
+        );
+
+        // Log for debugging
+        console.log(`Alpha: ${event.alpha}, Beta: ${event.beta}, Gamma: ${event.gamma}`);
+        console.log(`Target X Rotation: ${targetRotationX}, Target Y Rotation: ${targetRotationY}`);
     }
-}
+};
 
 export default function threeSkyScene(app, isMobile) {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -148,6 +175,7 @@ export default function threeSkyScene(app, isMobile) {
 
     let targetRotationX = 0;
     let targetRotationY = 0;
+    let lastAlpha = null; // Declare this up here
 
     const limitVerticalTilt = () => {
         if (targetRotationX > maxTiltUp) targetRotationX = maxTiltUp;
