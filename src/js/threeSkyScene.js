@@ -28,11 +28,11 @@ const cameraParams = {
         maxTiltDown: THREE.MathUtils.degToRad(-30),
     },
     mobile: {
-        fov: 60,
-        position: { x: 0, y: 4.5, z: 0 },
-        lookAt: { x: 0, y: 8, z: -40 },
+        fov: 70,
+        position: { x: 0, y: 2.5, z: 0 },
+        lookAt: { x: 0, y: 2, z: -40 },
         maxTiltUp: THREE.MathUtils.degToRad(15),
-        maxTiltDown: THREE.MathUtils.degToRad(-30),
+        maxTiltDown: THREE.MathUtils.degToRad(-15),
     },
 };
 
