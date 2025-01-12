@@ -218,7 +218,6 @@ export default function zodiacFortuneView() {
             window.addEventListener('mousemove', handleMouseMove);
         }
     };
-
     parallaxEffect();
 
     return container;
