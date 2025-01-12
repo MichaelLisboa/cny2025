@@ -233,6 +233,16 @@ export const createDatePicker = () => {
         }
     });
 
+    // Add event listener to close the date picker when navigating back
+    window.addEventListener('popstate', () => {
+        gsap.to(datePicker, { opacity: 0, duration: 0.3, onComplete: () => {
+            datePicker.style.display = 'none';
+        }});
+        gsap.to(overlay, { opacity: 0, duration: 0.5, onComplete: () => {
+            overlay.style.display = 'none';
+        }});
+    });
+
     datePickerWrapper.appendChild(inputField);
     document.body.appendChild(overlay); 
     document.body.appendChild(datePicker); // Append the date picker to the body to ensure it is above the overlay
