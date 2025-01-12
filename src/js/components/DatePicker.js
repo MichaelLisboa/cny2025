@@ -32,7 +32,7 @@ export const createDatePicker = () => {
     Object.assign(inputField.style, {
         width: '100%',
         padding: '12px',
-        fontSize: '16px',
+        fontSize: '1.5rem',
         border: '1px solid #ccc',
         borderRadius: '8px',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
@@ -176,8 +176,8 @@ export const createDatePicker = () => {
             const isFuture = new Date(year, month, i) > today;
             if (isFuture) {
                 day.style.cursor = 'not-allowed';
-                day.style.color = '#999';
-                day.style.background = '#ddd';
+                day.style.color = '#ccc';
+                day.style.background = '#fff';
             } else {
                 day.addEventListener('click', () => {
                     const selectedDate = new Date(year, month, i);
