@@ -150,7 +150,7 @@ export default function zodiacFortuneView() {
     // GSAP Parallax Logic
     const parallaxEffect = () => {
         const elementMovement = isMobile ? 40 : 30; // Subtle movement for mobile vs desktop
-        const animalMovement = isMobile ? 10 : 7;
+        const animalMovement = isMobile ? 20 : 15;
     
         // Store the initial touch positions for gestures
         let initialTouchX = 0;
