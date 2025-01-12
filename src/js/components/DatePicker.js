@@ -23,7 +23,7 @@ export const createDatePicker = (onDateSelected) => {
         left: '0',
         width: '100vw',
         height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         zIndex: '999', // Lower z-index than the calendar
         display: 'none', // Initially hidden
     });
@@ -36,11 +36,11 @@ export const createDatePicker = (onDateSelected) => {
         fontSize: '1.5rem',
         border: '1px solid #ccc',
         borderRadius: '8px',
-        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 2px 15px rgba(0, 0, 0, 0.1)',
         textAlign: 'center',
         outline: 'none', // Remove focus border
     });
-    inputField.placeholder = 'Enter your birth date';
+    inputField.placeholder = 'Enter your birthdate';
     inputField.readOnly = true; // Prevent manual typing
 
     // Date picker container
@@ -52,7 +52,7 @@ export const createDatePicker = (onDateSelected) => {
         transform: 'translate(-50%, -50%)',
         background: '#fff',
         borderRadius: '8px',
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25)',
         zIndex: '1000', // Higher z-index than the overlay
         display: 'none', // Make it hidden initially
         padding: '16px',

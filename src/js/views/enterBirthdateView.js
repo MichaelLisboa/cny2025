@@ -58,6 +58,7 @@ export const enterBirthdateView = () => {
         padding: "20px",
         boxSizing: "border-box",
         zIndex: "1",
+        marginTop: '-80px',
     });
 
     const title = document.createElement("h1");
