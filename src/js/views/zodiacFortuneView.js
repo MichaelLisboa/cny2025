@@ -10,7 +10,6 @@ export default function zodiacFortuneView() {
         height: '100vh',
         width: '100vw',
         color: '#ffffff',
-        fontFamily: 'Montserrat, sans-serif',
         textAlign: 'center',
         zIndex: '1',
     });
