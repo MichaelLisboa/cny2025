@@ -17,7 +17,7 @@ export const createDatePicker = () => {
     // Full-screen translucent overlay
     const overlay = document.createElement('div');
     Object.assign(overlay.style, {
-        position: 'fixed',
+        position: 'absolute',
         top: '0',
         left: '0',
         width: '100vw',
@@ -37,7 +37,6 @@ export const createDatePicker = () => {
         borderRadius: '8px',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         outline: 'none', // Remove focus border
-        marginBottom: '16px', // Add some space between the input field and the date picker
     });
     inputField.placeholder = 'Enter your birth date';
     inputField.readOnly = true; // Prevent manual typing
@@ -45,7 +44,7 @@ export const createDatePicker = () => {
     // Date picker container
     const datePicker = document.createElement('div');
     Object.assign(datePicker.style, {
-        position: 'fixed', // Change to fixed to ensure it is above the overlay
+        position: 'absolute', // Change to fixed to ensure it is above the overlay
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
@@ -56,7 +55,7 @@ export const createDatePicker = () => {
         display: 'none', // Make it hidden initially
         padding: '16px',
         textAlign: 'center',
-        width: '100%', // Ensure it fits within the container
+        width: '80%', // Ensure it fits within the container
         maxWidth: '600px', // Set max-width to 600px
     });
 
@@ -64,7 +63,7 @@ export const createDatePicker = () => {
     Object.assign(header.style, {
         display: 'flex',
         justifyContent: 'space-between',
-        marginBottom: '12px',
+        marginBottom: '24px',
     });
 
     const monthDropdown = document.createElement('select');

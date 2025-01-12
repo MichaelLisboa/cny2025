@@ -8,7 +8,6 @@ export const enterBirthdateView = () => {
         alignItems: "center",
         height: "100vh",
         width: "100vw",
-        padding: "20px",
         boxSizing: "border-box",
         color: "#ffffff", // Text color
         textAlign: "center",
@@ -17,10 +16,11 @@ export const enterBirthdateView = () => {
     // Content Container
     const contentContainer = document.createElement("div");
     Object.assign(contentContainer.style, {
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        width: "100%",
+        width: "90%",
         maxWidth: "400px",
         padding: "20px",
         boxSizing: "border-box",
