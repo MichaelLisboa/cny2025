@@ -1,7 +1,7 @@
+import { gsap } from 'gsap';
 import { navigateTo } from '../utils/router.js';
 import getDeviceInfo from '../utils/deviceUtils.js';
 import { createPictureElement } from '../utils/imageUtils.js';
-import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../utils/floatingAnimation.js';
 import threeSkyScene from '../threeSkyScene.js';
 import { createCrowdScene } from '../components/crowdScene';

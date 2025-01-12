@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
+import { dispatch } from '../utils/stateManager.js';
 
-export const createDatePicker = () => {
+export const createDatePicker = (onDateSelected) => {
     const datePickerWrapper = document.createElement('div');
     Object.assign(datePickerWrapper.style, {
         display: 'flex',
@@ -36,6 +37,7 @@ export const createDatePicker = () => {
         border: '1px solid #ccc',
         borderRadius: '8px',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
         outline: 'none', // Remove focus border
     });
     inputField.placeholder = 'Enter your birth date';
@@ -136,7 +138,6 @@ export const createDatePicker = () => {
     header.appendChild(yearDropdown);
     datePicker.appendChild(header);
     datePicker.appendChild(daysGrid);
-    // datePicker.appendChild(closeButton);
 
     // Function to update days based on selected month and year
     const updateDays = (month, year) => {
@@ -185,6 +186,12 @@ export const createDatePicker = () => {
                     const submittedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                     inputField.value = formattedDate;
                     console.log(`Submitted Date: ${submittedDate}`);
+                    
+                    // Call the callback function with the selected date
+                    if (onDateSelected) {
+                        onDateSelected(submittedDate);
+                    }
+
                     gsap.to(datePicker, { opacity: 0, duration: 0.5, onComplete: () => {
                         datePicker.style.display = 'none';
                     }});

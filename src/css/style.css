@@ -19,6 +19,9 @@ body, html {
   overflow: hidden;
   height: 100%;
   background-color: #120f29;
+  background-image: url('/path/to/your/image.jpg'); /* Add your background image path here */
+  background-size: cover; /* Cover the entire background */
+  background-position: center; /* Center the background image */
 }
 
 #app {

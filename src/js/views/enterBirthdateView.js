@@ -1,6 +1,17 @@
+import { initializeState, dispatch } from '../utils/stateManager.js';
 import { createDatePicker } from "../components/DatePicker";
+import { determineZodiacAnimalAndElement } from '../utils/GetZodiacAnimal.js';
+import { createPictureElement } from '../utils/imageUtils.js';
+import { gsap } from 'gsap';
 
 export const enterBirthdateView = () => {
+    // Initialize the app state
+    initializeState({
+        birthdate: null,
+        zodiac: null,
+        element: null,
+    });
+
     const container = document.createElement("div");
     Object.assign(container.style, {
         display: "flex",
@@ -11,7 +22,24 @@ export const enterBirthdateView = () => {
         boxSizing: "border-box",
         color: "#ffffff", // Text color
         textAlign: "center",
+        position: "relative", // Ensure the background image is positioned correctly
+        overflow: "hidden", // Prevent overflow
     });
+
+    // Add the background image
+    const backgroundImage = createPictureElement('land-and-sky-background.png');
+    const backgroundImageElement = backgroundImage.querySelector('img');
+    Object.assign(backgroundImageElement.style, {
+        position: 'absolute',
+        bottom: '-10%', // Fix the bottom of the image
+        left: '0',
+        width: '125%', // Maintain aspect ratio
+        height: 'auto', // Ensure the image fills the viewport height
+        minWidth: '200vw', // Ensure the image is larger than the viewport width
+        overflow: 'hidden',
+        zIndex: '-1', // Ensure it is behind other content
+    });
+    container.appendChild(backgroundImage);
 
     // Content Container
     const contentContainer = document.createElement("div");
@@ -24,6 +52,7 @@ export const enterBirthdateView = () => {
         maxWidth: "400px",
         padding: "20px",
         boxSizing: "border-box",
+        zIndex: "1", // Ensure it is above the background image
     });
 
     // Title
@@ -54,7 +83,13 @@ export const enterBirthdateView = () => {
     });
 
     // Create and append the datePicker on load
-    const datePicker = createDatePicker();
+    const datePicker = createDatePicker((submittedDate) => {
+        dispatch({ type: 'SET_BIRTHDATE', payload: submittedDate });
+
+        const { animal, element } = determineZodiacAnimalAndElement(submittedDate);
+        dispatch({ type: 'SET_ZODIAC', payload: animal });
+        dispatch({ type: 'SET_ELEMENT', payload: element });
+    });
     inputContainer.appendChild(datePicker);
 
     // Next Button
@@ -80,6 +115,51 @@ export const enterBirthdateView = () => {
 
     // Append content container to main container
     container.appendChild(contentContainer);
+
+    // Handle mouse movement and device orientation
+    const handleMovement = (moveX) => {
+        const maxMoveX = (backgroundImageElement.clientWidth - window.innerWidth);
+        const constrainedMoveX = Math.max(-maxMoveX, Math.min(0, moveX));
+        gsap.to(backgroundImageElement, {
+            x: constrainedMoveX,
+            duration: 1, // Increase duration for smoother motion
+            ease: 'power2.out', // Use a smoother easing function
+        });
+    };
+
+    // Handle mouse movement
+    document.addEventListener('mousemove', (event) => {
+        const { clientX } = event;
+        const { innerWidth } = window;
+        const moveX = ((clientX / innerWidth) * 100 - 50) * 2; // Adjust multiplier for desired effect
+        handleMovement(moveX);
+    });
+
+    // Handle device orientation
+    window.addEventListener('deviceorientation', (event) => {
+        const { gamma } = event;
+        const moveX = (gamma / 45) * 50;
+        handleMovement(moveX);
+    });
+
+    // Handle touch events for swipe gestures
+    let touchStartX = 0;
+    let touchMoveX = 0;
+
+    container.addEventListener('touchstart', (event) => {
+        touchStartX = event.touches[0].clientX;
+    });
+
+    container.addEventListener('touchmove', (event) => {
+        touchMoveX = event.touches[0].clientX;
+        const moveX = ((touchMoveX - touchStartX) / window.innerWidth) * 100;
+        handleMovement(moveX);
+    });
+
+    container.addEventListener('touchend', () => {
+        touchStartX = 0;
+        touchMoveX = 0;
+    });
 
     // Return the view
     return container;
