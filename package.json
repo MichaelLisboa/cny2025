@@ -29,6 +29,7 @@
   "dependencies": {
     "fs-extra": "^11.2.0",
     "glob": "^11.0.0",
+    "p-limit": "^6.2.0",
     "path": "^0.12.7",
     "vite-imagetools": "^7.0.5"
   }
