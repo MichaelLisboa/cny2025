@@ -1,10 +1,12 @@
 import { initializeState, dispatch } from '../utils/stateManager.js';
+import getDeviceInfo from '../utils/deviceUtils.js';
 import { createDatePicker } from "../components/DatePicker";
-import { determineZodiacAnimalAndElement } from '../utils/GetZodiacAnimal.js';
+import { determineZodiacAnimalAndElement } from '../utils/getZodiacAnimal.js';
 import { createPictureElement } from '../utils/imageUtils.js';
 import { gsap } from 'gsap';
 
 export const enterBirthdateView = () => {
+    const { isMobile } = getDeviceInfo();
     // Initialize the app state
     initializeState({
         birthdate: null,
@@ -31,11 +33,12 @@ export const enterBirthdateView = () => {
     const backgroundImageElement = backgroundImage.querySelector('img');
     Object.assign(backgroundImageElement.style, {
         position: 'absolute',
-        bottom: '-10%', // Fix the bottom of the image
-        left: '0',
-        width: '125%', // Maintain aspect ratio
+        bottom: isMobile ? '-2%' : '-15%', // Adjust for mobile
+        left: '50%', // Start in the center
+        transform: 'translateX(-50%)', // Center the image
+        width: '300%', // Maintain aspect ratio
         height: 'auto', // Ensure the image fills the viewport height
-        minWidth: '200vw', // Ensure the image is larger than the viewport width
+        minWidth: '300vw', // Ensure the image is larger than the viewport width
         overflow: 'hidden',
         zIndex: '-1', // Ensure it is behind other content
     });
