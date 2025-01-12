@@ -4,7 +4,8 @@ const path = require('path');
 const glob = require('glob');
 
 const inputFolder = path.join(__dirname, '../src/assets/images');
-const outputFolder = path.join(__dirname, '../public/assets/images');
+const publicOutputFolder = path.join(__dirname, '../public/assets/images');
+const distOutputFolder = path.join(__dirname, '../dist/assets/images');
 const resolutions = [480, 768, 1024, 1440, 1920, 3840];
 
 async function processImages() {
@@ -13,8 +14,12 @@ async function processImages() {
     const { default: pLimit } = await import('p-limit');
     const limit = pLimit(4);
 
-    await fs.emptyDir(outputFolder);
-    console.log('Output folder cleared.');
+    // Clear both directories
+    await fs.emptyDir(publicOutputFolder);
+    console.log('Public output folder cleared.');
+
+    await fs.emptyDir(distOutputFolder);
+    console.log('Dist output folder cleared.');
 
     const files = glob.sync(`${inputFolder}/*.{jpg,png}`);
     const totalFiles = files.length;
@@ -24,7 +29,8 @@ async function processImages() {
       return;
     }
 
-    await fs.ensureDir(outputFolder);
+    await fs.ensureDir(publicOutputFolder);
+    await fs.ensureDir(distOutputFolder);
 
     const tasks = files.map((file, index) =>
       limit(async () => {
@@ -39,18 +45,18 @@ async function processImages() {
             sharp(file)
               .resize({ width: resolution })
               .toFormat('webp')
-              .toFile(path.join(outputFolder, `${fileName}-${resolution}.webp`))
+              .toFile(path.join(publicOutputFolder, `${fileName}-${resolution}.webp`))
           );
         }
 
         tasks.push(
           sharp(file)
             .toFormat('webp')
-            .toFile(path.join(outputFolder, `${fileName}-original.webp`))
+            .toFile(path.join(publicOutputFolder, `${fileName}-original.webp`))
         );
 
         tasks.push(
-          fs.copyFile(file, path.join(outputFolder, `${fileName}-original${path.extname(file)}`))
+          fs.copyFile(file, path.join(publicOutputFolder, `${fileName}-original${path.extname(file)}`))
         );
 
         await Promise.all(tasks);
