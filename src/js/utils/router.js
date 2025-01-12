@@ -1,11 +1,11 @@
 import { gsap } from 'gsap';
 import { home } from '../views/home';
 import { enterBirthdateView } from '../views/enterBirthdateView';
+import zodiacFortuneView from '../views/zodiacFortuneView.js';
 // import { createLanternView } from './views/createLanternView';
 // import { previewLanternView } from './views/previewLanternView';
 // import { shareLanternView } from './views/shareLanternView';
 // import { viewLanternsView } from './views/viewLanternsView';
-// import { zodiacFortuneView } from './views/zodiacFortuneView';
 
 // Define your routes
 const routes = {
@@ -15,7 +15,7 @@ const routes = {
     // '/view-lantern': previewLanternView,
     // '/share-lantern': shareLanternView,
     // '/view-lanterns': viewLanternsView,
-    // '/fortune': zodiacFortuneView,
+    '/fortune': zodiacFortuneView,
     '/404': () => {
         const container = document.createElement('div');
         container.textContent = 'Page not found!';

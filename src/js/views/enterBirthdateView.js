@@ -3,11 +3,14 @@ import getDeviceInfo from '../utils/deviceUtils.js';
 import { createDatePicker } from "../components/DatePicker";
 import { determineZodiacAnimalAndElement } from '../utils/getZodiacAnimal.js';
 import { createPictureElement } from '../utils/imageUtils.js';
+import { createButton } from '../components/Button.js';
+import { navigateTo } from '../utils/router.js';
 import { gsap } from 'gsap';
 
 export const enterBirthdateView = () => {
     const { isMobile } = getDeviceInfo();
 
+    // Initialize the app state
     initializeState({
         birthdate: null,
         zodiac: null,
@@ -36,7 +39,7 @@ export const enterBirthdateView = () => {
         bottom: isMobile ? '-2%' : '-20%', // Adjusted for desktop responsiveness
         left: '50%',
         transform: 'translateX(-50%)',
-        width: isMobile ? '300%' : '175%', // Adjusted for desktop responsiveness
+        width: isMobile ? '300%' : '125%', // Adjusted for desktop responsiveness
         height: 'auto',
         minWidth: isMobile ? '200vw' : '120vw', // Dynamic scaling
         overflow: 'hidden',
@@ -87,22 +90,16 @@ export const enterBirthdateView = () => {
         const { animal, element } = determineZodiacAnimalAndElement(submittedDate);
         dispatch({ type: 'SET_ZODIAC', payload: animal });
         dispatch({ type: 'SET_ELEMENT', payload: element });
+
+        // Show the next button once a birthdate is selected
+        nextButton.style.display = 'block';
     });
     inputContainer.appendChild(datePicker);
 
-    const nextButton = document.createElement("button");
-    nextButton.textContent = "Next";
-    Object.assign(nextButton.style, {
-        padding: "10px 20px",
-        borderRadius: "5px",
-        border: "none",
-        backgroundColor: "#ffb703",
-        color: "#001d3d",
-        fontSize: "1rem",
-        fontWeight: "bold",
-        cursor: "pointer",
-        marginTop: "20px",
+    const nextButton = createButton("Next", () => {
+        navigateTo('/fortune');
     });
+    nextButton.style.display = 'none'; // Hide the button initially
 
     contentContainer.appendChild(title);
     contentContainer.appendChild(subtitle);

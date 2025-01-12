@@ -1,7 +1,7 @@
 // stateManager.js
 
 // Helper to get state from localStorage
-const getState = () => {
+export const getState = () => {
     const state = localStorage.getItem('appState');
     return state ? JSON.parse(state) : {}; // Return parsed state or default empty object
 };
@@ -45,5 +45,3 @@ export const initializeState = (defaultState) => {
     }
 };
 
-// Example: Get current state directly
-export const state = getState;

@@ -1,7 +1,15 @@
 import { gsap } from 'gsap';
 import { createFloatingAnimation } from '../utils/floatingAnimation.js';
 
-export const createButton = (container, text = 'Continue', onClick = () => {}, floating = false) => {
+export const createButton = (text = 'Continue', onClick = () => {}, floating = false) => {
+  // Create the button container div
+  const buttonContainer = document.createElement('div');
+  Object.assign(buttonContainer.style, {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '2rem',
+  });
+
   // Create the outer wrapper div for the glowing effect
   const wrapper = document.createElement('div');
   Object.assign(wrapper.style, {
@@ -16,7 +24,6 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
     cursor: 'pointer',
     overflow: 'hidden',
     transition: 'box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out',
-
     backdropFilter: "blur(4px)",
   });
 
@@ -44,8 +51,8 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
   // Add click handler to the wrapper
   wrapper.addEventListener('click', onClick);
 
-  // Append the wrapper to the container
-  container.appendChild(wrapper);
+  // Append the wrapper to the button container
+  buttonContainer.appendChild(wrapper);
 
   // GSAP Glow Animation for the wrapper
   gsap.to(wrapper, {
@@ -84,5 +91,5 @@ export const createButton = (container, text = 'Continue', onClick = () => {}, f
     floatingAnimation(wrapper); // Apply to the button wrapper
   }
 
-  return wrapper;
+  return buttonContainer;
 };

@@ -64,21 +64,11 @@ export const home = () => {
     textParagraph.textContent = 'Share wishes with your loved ones, slithering into the new year with hope, wisdom, and lucky fortunes.'; // Add your desired text
     textDiv.appendChild(textParagraph);
 
-    // Create the button container div
-    const getButtonContainerStyles = () => ({
-        display: 'flex',
-        justifyContent: 'center',
-        marginTop: '2rem',
-    });
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'button-container';
-    Object.assign(buttonContainer.style, getButtonContainerStyles());
-
-    // Add the button
-    createButton(buttonContainer, 'Continue', () => {
+    // Create the button
+    const nextButton = createButton('Continue', () => {
         window.history.pushState(null, null, '/');
         navigateTo('/enter-birthdate');
-    }, false);
+    });
 
     // Initialize the Three.js scene
     threeSkyScene(mainContainer, isMobile, oS, deviceType, browser); // Pass app & isMobile as needed
@@ -89,7 +79,7 @@ export const home = () => {
     // Append all elements to the main container
     contentContainer.appendChild(logoImage);
     contentContainer.appendChild(textDiv);
-    contentContainer.appendChild(buttonContainer);
+    contentContainer.appendChild(nextButton);
     mainContainer.appendChild(contentContainer);
 
     // Append the main container to the app
