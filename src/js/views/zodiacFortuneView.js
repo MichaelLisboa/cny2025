@@ -1,8 +1,8 @@
-
 import { getState } from '../utils/stateManager.js';
 import { createPictureElement } from '../utils/imageUtils.js';
 import getDeviceInfo from '../utils/deviceUtils.js';
 import { gsap } from 'gsap';
+import { zodiacData } from '../fortune-data.js';
 
 export default function zodiacFortuneView() {
     const { isMobile } = getDeviceInfo(); // Determine if the device is mobile
@@ -19,23 +19,7 @@ export default function zodiacFortuneView() {
         overflowY: 'auto', // Parent container is scrollable
         padding: '128px 1rem 172px', // Pushed down by 128px, with 172px padding at the bottom
         boxSizing: 'border-box',
-        position: 'relative', // Ensure proper layering for the background
     });
-
-    // Background image layer (ADDITION)
-    const backgroundImage = createPictureElement('land-and-sky-background.png');
-    const backgroundImageElement = backgroundImage.querySelector('img');
-    Object.assign(backgroundImageElement.style, {
-        position: 'absolute',
-        bottom: isMobile ? '-2%' : '-20%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: isMobile ? '300%' : '125%',
-        height: 'auto',
-        minWidth: isMobile ? '200vw' : '120vw',
-        zIndex: '-1', // Ensures it's behind all content
-    });
-    container.appendChild(backgroundImage);
 
     // Content container for layout and styling
     const contentContainer = document.createElement('div');
@@ -51,7 +35,32 @@ export default function zodiacFortuneView() {
 
     // Fetch the zodiac animal and element from state
     const state = getState();
-    const { zodiac, element } = state || { zodiac: 'Unknown', element: 'Unknown' }; // Fallback values
+    const { zodiac, element } = state || { zodiac: 'Snake', element: 'Metal' }; // Fallback values
+
+    // Find matching zodiac entry in fortune-data
+    const currentZodiac = zodiacData.find(
+        item => item.slug.toLowerCase() === (zodiac || '').toLowerCase()
+    ) || {};
+
+    // Replace the static fortunes array with dynamic data
+    const fortunes = [
+        {
+            title: "Your Yearly Outlook",
+            body: currentZodiac.story || "No story available."
+        },
+        {
+            title: "Career",
+            body: currentZodiac.careerDescription || "No career info available."
+        },
+        {
+            title: "Health",
+            body: currentZodiac.healthDescription || "No health info available."
+        },
+        {
+            title: "Relationships",
+            body: currentZodiac.relationshipDescription || "No relationship info available."
+        }
+    ];
 
     // Zodiac image section
     const zodiacImageContainer = document.createElement('div');
@@ -95,9 +104,6 @@ export default function zodiacFortuneView() {
     const title = document.createElement('h1');
     title.textContent = `${element} ${zodiac}`;
     Object.assign(title.style, {
-        fontSize: '2.5rem',
-        fontWeight: 'bold',
-        marginBottom: '1rem',
         textAlign: 'center',
         color: 'white', // Text color
     });
@@ -107,50 +113,21 @@ export default function zodiacFortuneView() {
     Object.assign(fortuneSection.style, {
         display: 'flex',
         flexDirection: 'column',
-        gap: '1rem',
         textAlign: 'left',
         color: 'white', // Text color
     });
-
-    const fortunes = [
-        {
-            title: "What the Year of the Dragon brings for You",
-            body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent tincidunt libero nec ligula sollicitudin ultrices.",
-        },
-        {
-            title: "How’s the Career going?",
-            body: "Phasellus nec nisl et ipsum elementum varius sed a lacus. Suspendisse potenti. Nulla facilisi.",
-        },
-        {
-            title: "What about the Health outlook?",
-            body: "Fusce nec nisi sit amet elit vehicula feugiat. Nulla fringilla lorem vel ex laoreet posuere.",
-        },
-        {
-            title: "Let’s talk about Love",
-            body: "Quisque id elit eget felis sagittis efficitur. Etiam auctor purus quis quam sodales tincidunt.",
-        },
-        {
-            title: "Any advice?",
-            body: "Duis aliquet odio et libero pellentesque, ac accumsan orci aliquam. Nulla convallis mi et nisl tincidunt lacinia.",
-        },
-    ];
 
     fortunes.forEach((fortune) => {
         const fortuneTitle = document.createElement('h3');
         fortuneTitle.textContent = fortune.title;
         Object.assign(fortuneTitle.style, {
-            fontSize: '1.25rem',
-            fontWeight: 'bold',
-            marginBottom: '0.5rem',
+            textAlign: 'center',
+            color: 'white', // Text color
         });
 
         const fortuneBody = document.createElement('p');
         fortuneBody.textContent = fortune.body;
-        fortuneBody.className = 'medium-text'; // Added medium-text class
-        Object.assign(fortuneBody.style, {
-            fontSize: '1rem',
-            lineHeight: '1.5',
-        });
+        fortuneBody.className = 'text-medium'; // Added medium-text class
 
         fortuneSection.appendChild(fortuneTitle);
         fortuneSection.appendChild(fortuneBody);
@@ -164,42 +141,78 @@ export default function zodiacFortuneView() {
     // Add the content container to the main scrollable container
     container.appendChild(contentContainer);
 
-    // Background motion logic (ADDITION)
-    const handleBackgroundMovement = (moveX) => {
-        const maxMoveX = (backgroundImageElement.clientWidth - window.innerWidth) / 2;
-        const constrainedMoveX = Math.max(-maxMoveX, Math.min(maxMoveX, moveX));
-        gsap.to(backgroundImageElement, {
-            x: constrainedMoveX,
-            duration: 1,
-            ease: 'power2.out',
-        });
+    // GSAP Parallax Logic
+    const parallaxEffect = () => {
+        const elementMovement = isMobile ? 40 : 30; // Subtle movement for mobile vs desktop
+        const animalMovement = isMobile ? 20 : 15;
+    
+        // Store the initial touch positions for gestures
+        let initialTouchX = 0;
+    
+        // Mouse move listener
+        const handleMouseMove = (e) => {
+            const xPos = (e.clientX / window.innerWidth - 0.5) * 2; // Normalize between -1 and 1
+            gsap.to(elementImageElement, {
+                x: xPos * elementMovement,
+                duration: 0.5,
+                ease: 'power2.out',
+            });
+            gsap.to(zodiacImageElement, {
+                x: xPos * animalMovement,
+                duration: 0.5,
+                ease: 'power2.out',
+            });
+        };
+    
+        // Gesture (Touch Input) Listener
+        const handleTouchStart = (e) => {
+            if (e.touches.length === 1) {
+                initialTouchX = e.touches[0].clientX;
+            }
+        };
+    
+        const handleTouchMove = (e) => {
+            if (e.touches.length === 1) {
+                const deltaX = e.touches[0].clientX - initialTouchX;
+                const xPos = deltaX / window.innerWidth; // Normalize deltaX to a small range
+                gsap.to(elementImageElement, {
+                    x: xPos * elementMovement,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                });
+                gsap.to(zodiacImageElement, {
+                    x: xPos * animalMovement,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                });
+            }
+        };
+    
+        // Device orientation listener
+        const handleDeviceOrientation = (event) => {
+            const xPos = event.gamma / 45; // Normalize gamma between -1 and 1
+            gsap.to(elementImageElement, {
+                x: xPos * elementMovement,
+                duration: 0.5,
+                ease: 'power2.out',
+            });
+            gsap.to(zodiacImageElement, {
+                x: xPos * animalMovement,
+                duration: 0.5,
+                ease: 'power2.out',
+            });
+        };
+    
+        // Event listeners
+        if (isMobile) {
+            window.addEventListener('deviceorientation', handleDeviceOrientation);
+            window.addEventListener('touchstart', handleTouchStart);
+            window.addEventListener('touchmove', handleTouchMove);
+        } else {
+            window.addEventListener('mousemove', handleMouseMove);
+        }
     };
-
-    // Mouse movement
-    document.addEventListener('mousemove', (event) => {
-        const { clientX } = event;
-        const moveX = ((clientX / window.innerWidth) - 0.5) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.2;
-        handleBackgroundMovement(moveX);
-    });
-
-    // Device orientation
-    window.addEventListener('deviceorientation', (event) => {
-        const { gamma } = event;
-        const moveX = (gamma / 45) * (backgroundImageElement.clientWidth - window.innerWidth) / 4;
-        handleBackgroundMovement(moveX);
-    });
-
-    // Touch gestures
-    let touchStartX = 0;
-    container.addEventListener('touchstart', (event) => {
-        touchStartX = event.touches[0].clientX;
-    });
-
-    container.addEventListener('touchmove', (event) => {
-        const touchMoveX = event.touches[0].clientX;
-        const moveX = ((touchMoveX - touchStartX) / window.innerWidth) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.4;
-        handleBackgroundMovement(moveX);
-    });
+    parallaxEffect();
 
     return container;
 }
