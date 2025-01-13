@@ -16,22 +16,58 @@ export default function zodiacFortuneView() {
         justifyContent: 'flex-start',
         height: '100vh',
         width: '100vw',
-        overflowY: 'auto', // Parent container is scrollable
-        padding: '128px 1rem 172px', // Pushed down by 128px, with 172px padding at the bottom
+        overflow: 'hidden',
         boxSizing: 'border-box',
     });
 
-    // Content container for layout and styling
-    const contentContainer = document.createElement('div');
-    Object.assign(contentContainer.style, {
-        maxWidth: '600px', // Limit width
-        width: '100%', // Allow full width within max-width
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        boxSizing: 'border-box',
-        padding: isMobile ? '0 16px' : '0', // Add padding for mobile devices
+    // Add the background image
+    const backgroundImage = createPictureElement('land-and-sky-background.png');
+    const backgroundImageElement = backgroundImage.querySelector('img');
+    Object.assign(backgroundImage.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
     });
+    Object.assign(backgroundImageElement.style, {
+        position: 'absolute',
+        bottom: isMobile ? '-2%' : '-20%', // Adjusted for desktop responsiveness
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: isMobile ? '300%' : '125%', // Adjusted for desktop responsiveness
+        height: 'auto',
+        minWidth: isMobile ? '200vw' : '120vw', // Dynamic scaling
+        overflow: 'hidden',
+        zIndex: '-1',
+    });
+    container.appendChild(backgroundImage);
+
+    // Content container for layout and styling
+    const contentContainer = document.createElement("div");
+    Object.assign(contentContainer.style, {
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        padding: '128px 24px 172px', // Pushed down by 128px, with 172px padding at the bottom
+        boxSizing: "border-box",
+        zIndex: "1",
+        overflowX: 'hidden',
+        overflowY: 'scroll',
+    });
+
+    const fortuneContainer = document.createElement("div");
+    Object.assign(contentContainer.style, {
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        boxSizing: "border-box",
+    });
+
+
 
     // Fetch the zodiac animal and element from state
     const state = getState();
@@ -115,6 +151,7 @@ export default function zodiacFortuneView() {
         flexDirection: 'column',
         textAlign: 'left',
         color: 'white', // Text color
+        maxWidth: '600px',
     });
 
     fortunes.forEach((fortune) => {
@@ -134,12 +171,50 @@ export default function zodiacFortuneView() {
     });
 
     // Append everything to the content container
-    contentContainer.appendChild(zodiacImageContainer); // Images first
-    contentContainer.appendChild(title); // Title after images
-    contentContainer.appendChild(fortuneSection);
+    fortuneContainer.appendChild(zodiacImageContainer); // Images first
+    fortuneContainer.appendChild(title); // Title after images
+    fortuneContainer.appendChild(fortuneSection);
 
     // Add the content container to the main scrollable container
+    contentContainer.appendChild(fortuneContainer);
     container.appendChild(contentContainer);
+
+    // Add smooth background motion logic
+const handleBackgroundMovement = (moveX) => {
+    const maxMoveX = (backgroundImageElement.clientWidth - window.innerWidth) / 2;
+    const constrainedMoveX = Math.max(-maxMoveX, Math.min(maxMoveX, moveX));
+    gsap.to(backgroundImageElement, {
+        x: constrainedMoveX,
+        duration: 0.5, // Smooth following
+        ease: 'power2.out',
+    });
+};
+
+// Mouse movement for background
+document.addEventListener('mousemove', (event) => {
+    const { clientX } = event;
+    const moveX = ((clientX / window.innerWidth) - 0.5) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.2;
+    handleBackgroundMovement(moveX);
+});
+
+// Device orientation for background
+window.addEventListener('deviceorientation', (event) => {
+    const { gamma } = event;
+    const moveX = (gamma / 45) * (backgroundImageElement.clientWidth - window.innerWidth) / 4;
+    handleBackgroundMovement(moveX);
+});
+
+// Touch gestures for background
+let touchStartX = 0;
+container.addEventListener('touchstart', (event) => {
+    touchStartX = event.touches[0].clientX;
+});
+
+container.addEventListener('touchmove', (event) => {
+    const touchMoveX = event.touches[0].clientX;
+    const moveX = ((touchMoveX - touchStartX) / window.innerWidth) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.4;
+    handleBackgroundMovement(moveX);
+});
 
     // GSAP Parallax Logic
     const parallaxEffect = () => {
