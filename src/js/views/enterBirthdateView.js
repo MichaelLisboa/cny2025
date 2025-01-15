@@ -228,7 +228,7 @@ export const enterBirthdateView = () => {
     contentContainer.appendChild(birthdatePickerContainer);
 
     (async () => {
-        const { captureBirthDate } = await import('../components/captureBirthdate.js');
+        const { captureBirthDate } = await import('../components/captureBirthDate.js');
         contentContainer.appendChild(
             captureBirthDate({
                 title: "Enter your birthdate",

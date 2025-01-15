@@ -169,7 +169,7 @@ export const zodiacFortuneView = () => {
     contentContainer.appendChild(birthdatePickerContainer);
 
     (async () => {
-        const { captureBirthDate } = await import('../components/captureBirthdate.js');
+        const { captureBirthDate } = await import('../components/captureBirthDate.js');
         const pickerComponent = captureBirthDate({
             title: "Enter your birthdate",
             subtitle: "When did the sky grace us with your presence?",
