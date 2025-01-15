@@ -1,5 +1,4 @@
 import { gsap } from 'gsap';
-import { dispatch } from '../utils/stateManager.js';
 
 export const createDatePicker = (onDateSelected) => {
     const datePickerWrapper = document.createElement('div');
@@ -30,6 +29,7 @@ export const createDatePicker = (onDateSelected) => {
 
     // Input field for birthdate
     const inputField = document.createElement('input');
+    inputField.setAttribute("aria-label", "Select your birthdate");
     Object.assign(inputField.style, {
         width: '100%',
         padding: '12px',
@@ -181,17 +181,19 @@ export const createDatePicker = (onDateSelected) => {
                 day.style.background = '#fff';
             } else {
                 day.addEventListener('click', () => {
-                    const selectedDate = new Date(year, month, i);
-                    const formattedDate = `${i} ${months[month]}, ${year}`;
-                    const submittedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                    inputField.value = formattedDate;
+                    const selectedDate = new Date(year, month, i); // Create a valid Date object
+                    const submittedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`; // Format as 'YYYY-MM-DD'
+                
+                    // Update the input field and callback
+                    inputField.value = `${i} ${months[month]}, ${year}`; // Readable format
                     console.log(`Submitted Date: ${submittedDate}`);
-                    
-                    // Call the callback function with the selected date
+                
+                    // Pass the submitted date to the callback
                     if (onDateSelected) {
                         onDateSelected(submittedDate);
                     }
-
+                
+                    // Hide the picker
                     gsap.to(datePicker, { opacity: 0, duration: 0.5, onComplete: () => {
                         datePicker.style.display = 'none';
                     }});

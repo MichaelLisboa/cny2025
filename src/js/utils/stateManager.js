@@ -28,6 +28,11 @@ const reducer = (state, action) => {
     }
 };
 
+export const birthdateExists = () => {
+    const state = getState();
+    return !!state.birthdate; // Returns true if birthdate exists, false otherwise
+};
+
 // Dispatch function to apply actions and update state
 export const dispatch = (action) => {
     const currentState = getState(); // Get current state

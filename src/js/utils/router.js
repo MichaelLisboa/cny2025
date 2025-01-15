@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
+import { createBaseLayout } from '../layouts/layout.js';
 import { home } from '../views/home';
-import { enterBirthdateView } from '../views/enterBirthdateView';
-import zodiacFortuneView from '../views/zodiacFortuneView.js';
+import { zodiacFortuneView } from '../views/zodiacFortuneView.js';
 // import { createLanternView } from './views/createLanternView';
 // import { previewLanternView } from './views/previewLanternView';
 // import { shareLanternView } from './views/shareLanternView';
@@ -10,17 +10,12 @@ import zodiacFortuneView from '../views/zodiacFortuneView.js';
 // Define your routes
 const routes = {
     '/': home,
-    '/enter-birthdate': enterBirthdateView,
+    // '/enter-birthdate': enterBirthdateView,
     // '/create-lantern': createLanternView,
     // '/view-lantern': previewLanternView,
     // '/share-lantern': shareLanternView,
     // '/view-lanterns': viewLanternsView,
     '/fortune': zodiacFortuneView,
-    '/404': () => {
-        const container = document.createElement('div');
-        container.textContent = 'Page not found!';
-        return container;
-    },
 };
 
 // 1. Load the correct view with transitions
@@ -156,8 +151,19 @@ document.addEventListener('scroll', () => {
 
 // 6. Error handling for undefined routes
 routes['/404'] = () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<h1>404 - Page Not Found</h1>';
+    const { container, contentContainer } = createBaseLayout({
+        backgroundImage: 'land-and-sky-background.png',
+        scrollable: false,
+    });
+
+    const message = document.createElement('h3');
+    message.textContent = 'Page not found';
+    Object.assign(message.style, {
+        textAlign: 'center',
+        color: 'white', // Text color
+    });
+
+    contentContainer.appendChild(message);
     return container;
 };
 

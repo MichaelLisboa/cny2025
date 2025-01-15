@@ -1,84 +1,33 @@
-import { getState } from '../utils/stateManager.js';
+import { getState, dispatch, birthdateExists } from '../utils/stateManager.js';
+import { determineZodiacAnimalAndElement } from '../utils/getZodiacAnimal.js';
+import { createBaseLayout } from '../layouts/layout.js';
+import { zodiacData } from '../fortune-data.js';
 import { createPictureElement } from '../utils/imageUtils.js';
 import getDeviceInfo from '../utils/deviceUtils.js';
 import { gsap } from 'gsap';
-import { zodiacData } from '../fortune-data.js';
 
-export default function zodiacFortuneView() {
-    const { isMobile } = getDeviceInfo(); // Determine if the device is mobile
+const { isMobile } = getDeviceInfo();
 
-    // Main container for the view
-    const container = document.createElement('div');
-    Object.assign(container.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        height: '100vh',
-        width: '100vw',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
-    });
-
-    // Add the background image
-    const backgroundImage = createPictureElement('land-and-sky-background.png');
-    const backgroundImageElement = backgroundImage.querySelector('img');
-    Object.assign(backgroundImage.style, {
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-    });
-    Object.assign(backgroundImageElement.style, {
-        position: 'absolute',
-        bottom: isMobile ? '-2%' : '-20%', // Adjusted for desktop responsiveness
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: isMobile ? '300%' : '125%', // Adjusted for desktop responsiveness
-        height: 'auto',
-        minWidth: isMobile ? '200vw' : '120vw', // Dynamic scaling
-        overflow: 'hidden',
-        zIndex: '-1',
-    });
-    container.appendChild(backgroundImage);
-
-    // Content container for layout and styling
-    const contentContainer = document.createElement("div");
-    Object.assign(contentContainer.style, {
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        padding: '128px 24px 172px', // Pushed down by 128px, with 172px padding at the bottom
-        boxSizing: "border-box",
-        zIndex: "1",
-        overflowX: 'hidden',
-        overflowY: 'scroll',
-    });
-
+const zodiacPresentation = () => {
     const fortuneContainer = document.createElement("div");
-    Object.assign(contentContainer.style, {
+    Object.assign(fortuneContainer.style, {
         position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         boxSizing: "border-box",
     });
-
-
 
     // Fetch the zodiac animal and element from state
     const state = getState();
-    const { zodiac, element } = state || { zodiac: 'Snake', element: 'Metal' }; // Fallback values
+    const { zodiac, element } = state || { zodiac: 'Snake', element: 'Metal' };
 
     // Find matching zodiac entry in fortune-data
     const currentZodiac = zodiacData.find(
         item => item.slug.toLowerCase() === (zodiac || '').toLowerCase()
     ) || {};
 
-    // Replace the static fortunes array with dynamic data
+    // Fortunes data
     const fortunes = [
         {
             title: "Your Yearly Outlook",
@@ -103,7 +52,7 @@ export default function zodiacFortuneView() {
     Object.assign(zodiacImageContainer.style, {
         position: 'relative',
         width: '100%',
-        height: '70vh', // Images take up 70% of vertical height
+        height: '70vh',
         marginBottom: '1.5rem',
     });
 
@@ -112,11 +61,11 @@ export default function zodiacFortuneView() {
     const elementImageElement = elementImage.querySelector('img');
     Object.assign(elementImageElement.style, {
         position: 'absolute',
-        top: isMobile ? '-256px' : '-128px', // Fixed to 72px from the top of the viewport
-        left: isMobile ? '-25%' : '-15%', // Offset to the left for mobile devices
-        width: isMobile ? '130%' : '110%', // Larger size for mobile devices
+        top: isMobile ? '-256px' : '-128px',
+        left: isMobile ? '-25%' : '-15%',
+        width: isMobile ? '130%' : '110%',
         height: isMobile ? '130%' : '110%',
-        opacity: '0.5', // Semi-transparent
+        opacity: '0.5',
         objectFit: 'contain',
         zIndex: '1',
     });
@@ -129,7 +78,7 @@ export default function zodiacFortuneView() {
         position: 'absolute',
         top: '0',
         left: '0',
-        width: '100%', // Zodiac image is larger
+        width: '100%',
         height: '100%',
         objectFit: 'contain',
         zIndex: '2',
@@ -141,7 +90,7 @@ export default function zodiacFortuneView() {
     title.textContent = `${element} ${zodiac}`;
     Object.assign(title.style, {
         textAlign: 'center',
-        color: 'white', // Text color
+        color: 'white',
     });
 
     // Fortune Section
@@ -150,7 +99,7 @@ export default function zodiacFortuneView() {
         display: 'flex',
         flexDirection: 'column',
         textAlign: 'left',
-        color: 'white', // Text color
+        color: 'white',
         maxWidth: '600px',
     });
 
@@ -159,135 +108,113 @@ export default function zodiacFortuneView() {
         fortuneTitle.textContent = fortune.title;
         Object.assign(fortuneTitle.style, {
             textAlign: 'center',
-            color: 'white', // Text color
+            color: 'white',
         });
 
         const fortuneBody = document.createElement('p');
         fortuneBody.textContent = fortune.body;
-        fortuneBody.className = 'text-medium'; // Added medium-text class
+        fortuneBody.className = 'text-medium';
 
         fortuneSection.appendChild(fortuneTitle);
         fortuneSection.appendChild(fortuneBody);
     });
 
-    // Append everything to the content container
-    fortuneContainer.appendChild(zodiacImageContainer); // Images first
-    fortuneContainer.appendChild(title); // Title after images
+    fortuneContainer.appendChild(zodiacImageContainer);
+    fortuneContainer.appendChild(title);
     fortuneContainer.appendChild(fortuneSection);
 
-    // Add the content container to the main scrollable container
-    contentContainer.appendChild(fortuneContainer);
-    container.appendChild(contentContainer);
-
-    // Add smooth background motion logic
-const handleBackgroundMovement = (moveX) => {
-    const maxMoveX = (backgroundImageElement.clientWidth - window.innerWidth) / 2;
-    const constrainedMoveX = Math.max(-maxMoveX, Math.min(maxMoveX, moveX));
-    gsap.to(backgroundImageElement, {
-        x: constrainedMoveX,
-        duration: 0.5, // Smooth following
-        ease: 'power2.out',
-    });
+    return fortuneContainer;
 };
 
-// Mouse movement for background
-document.addEventListener('mousemove', (event) => {
-    const { clientX } = event;
-    const moveX = ((clientX / window.innerWidth) - 0.5) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.2;
-    handleBackgroundMovement(moveX);
-});
+export const zodiacFortuneView = () => {
+    const { container, contentContainer } = createBaseLayout({
+        backgroundImage: 'land-and-sky-background.png',
+        scrollable: false,
+        backgroundPositionY: '100%',
+    });
 
-// Device orientation for background
-window.addEventListener('deviceorientation', (event) => {
-    const { gamma } = event;
-    const moveX = (gamma / 45) * (backgroundImageElement.clientWidth - window.innerWidth) / 4;
-    handleBackgroundMovement(moveX);
-});
+    const renderMainContent = () => {
+        // Animate the Zodiac Fortune into view
+        const fortuneContent = zodiacPresentation();
+        gsap.fromTo(
+            fortuneContent,
+            { y: '-100%', opacity: 0 },
+            { y: '0%', opacity: 1, duration: 2, ease: 'ease-in-out' }
+        );
 
-// Touch gestures for background
-let touchStartX = 0;
-container.addEventListener('touchstart', (event) => {
-    touchStartX = event.touches[0].clientX;
-});
+        contentContainer.appendChild(fortuneContent);
 
-container.addEventListener('touchmove', (event) => {
-    const touchMoveX = event.touches[0].clientX;
-    const moveX = ((touchMoveX - touchStartX) / window.innerWidth) * (backgroundImageElement.clientWidth - window.innerWidth) * 0.4;
-    handleBackgroundMovement(moveX);
-});
-
-    // GSAP Parallax Logic
-    const parallaxEffect = () => {
-        const elementMovement = isMobile ? 40 : 30; // Subtle movement for mobile vs desktop
-        const animalMovement = isMobile ? 20 : 15;
-    
-        // Store the initial touch positions for gestures
-        let initialTouchX = 0;
-    
-        // Mouse move listener
-        const handleMouseMove = (e) => {
-            const xPos = (e.clientX / window.innerWidth - 0.5) * 2; // Normalize between -1 and 1
-            gsap.to(elementImageElement, {
-                x: xPos * elementMovement,
-                duration: 0.5,
-                ease: 'power2.out',
-            });
-            gsap.to(zodiacImageElement, {
-                x: xPos * animalMovement,
-                duration: 0.5,
-                ease: 'power2.out',
-            });
-        };
-    
-        // Gesture (Touch Input) Listener
-        const handleTouchStart = (e) => {
-            if (e.touches.length === 1) {
-                initialTouchX = e.touches[0].clientX;
-            }
-        };
-    
-        const handleTouchMove = (e) => {
-            if (e.touches.length === 1) {
-                const deltaX = e.touches[0].clientX - initialTouchX;
-                const xPos = deltaX / window.innerWidth; // Normalize deltaX to a small range
-                gsap.to(elementImageElement, {
-                    x: xPos * elementMovement,
-                    duration: 0.5,
-                    ease: 'power2.out',
-                });
-                gsap.to(zodiacImageElement, {
-                    x: xPos * animalMovement,
-                    duration: 0.5,
-                    ease: 'power2.out',
-                });
-            }
-        };
-    
-        // Device orientation listener
-        const handleDeviceOrientation = (event) => {
-            const xPos = event.gamma / 45; // Normalize gamma between -1 and 1
-            gsap.to(elementImageElement, {
-                x: xPos * elementMovement,
-                duration: 0.5,
-                ease: 'power2.out',
-            });
-            gsap.to(zodiacImageElement, {
-                x: xPos * animalMovement,
-                duration: 0.5,
-                ease: 'power2.out',
-            });
-        };
-    
-        // Event listeners
-        if (isMobile) {
-            window.addEventListener('deviceorientation', handleDeviceOrientation);
-            window.addEventListener('touchstart', handleTouchStart);
-            window.addEventListener('touchmove', handleTouchMove);
-        } else {
-            window.addEventListener('mousemove', handleMouseMove);
-        }
+        // Enable scrollability after animation completes
+        setTimeout(() => {
+            contentContainer.style.overflowY = 'auto';
+        }, 500);
     };
-    parallaxEffect();
+
+    if (birthdateExists()) {
+        renderMainContent();
+        return container;
+    }
+
+    const birthdatePickerContainer = document.createElement('div');
+    Object.assign(birthdatePickerContainer.style, {
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+    });
+    birthdatePickerContainer.className = "birthdate-picker-container";
+
+    contentContainer.appendChild(birthdatePickerContainer);
+
+    (async () => {
+        const { captureBirthDate } = await import('../components/captureBirthdate.js');
+        const pickerComponent = captureBirthDate({
+            title: "Enter your birthdate",
+            subtitle: "When did the sky grace us with your presence?",
+            onSubmit: (birthdate) => {
+                if (!birthdate) {
+                    console.error("No valid date submitted.");
+                    return;
+                }
+
+                const { animal, element } = determineZodiacAnimalAndElement(birthdate);
+                if (!animal || !element) {
+                    console.error("Failed to determine Zodiac data.");
+                    return;
+                }
+
+                console.log(`Zodiac animal: ${animal}, Element: ${element}`);
+
+                dispatch({ type: "SET_ZODIAC", payload: animal });
+                dispatch({ type: "SET_ELEMENT", payload: element });
+
+                // Animate the transition from the picker to Zodiac fortune
+                gsap.to(birthdatePickerContainer, {
+                    y: '100%',
+                    opacity: 0,
+                    duration: 2,
+                    ease: 'ease-in-out',
+                    onComplete: () => {
+                        birthdatePickerContainer.remove();
+                        renderMainContent();
+                    },
+                });
+
+                // Get the background image element from the layout
+                const backgroundImageElement = container.querySelector('img');
+
+                // Background scroll effect
+                gsap.to(backgroundImageElement, {
+                    top: '0%',         // Move the background image to align its top with the container's top
+                    duration: 3,          // Slow, dramatic effect
+                    ease: 'ease-in-out',  // Smooth animation
+                });
+            },
+        });
+        birthdatePickerContainer.appendChild(pickerComponent);
+    })();
 
     return container;
-}
+};

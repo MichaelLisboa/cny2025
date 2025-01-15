@@ -73,6 +73,26 @@ export const createNavBar = () => {
         color: "#000", // Black text color
     });
 
+
+
+
+    /** Optional: Clear state from localStorage on logo click **/
+
+    function clearState() {
+        // Clear all items from localStorage
+        localStorage.clear();
+    
+        // Log confirmation
+        console.log("State cleared from localStorage.");
+    
+        // Optional: Reload the page or rerender the app
+        // location.reload(); // Uncomment if you want the page to refresh
+    }
+
+
+
+
+
     logoContent.appendChild(logoText);
     logoContainer.appendChild(logoContent);
 
@@ -165,6 +185,7 @@ export const createNavBar = () => {
                 refreshIndicator.style.opacity = "1";
                 setTimeout(() => {
                     location.reload(); // Basic browser refresh
+                    clearState(); // Clear state from localStorage
                 }, 500);
             } else {
                 appContainer.style.transition = "transform 0.3s ease";

@@ -67,7 +67,7 @@ export const home = () => {
     // Create the button
     const nextButton = createButton('Continue', () => {
         window.history.pushState(null, null, '/');
-        navigateTo('/enter-birthdate');
+        navigateTo('/fortune');
     });
 
     // Initialize the Three.js scene
