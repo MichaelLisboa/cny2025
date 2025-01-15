@@ -3,7 +3,7 @@ import { createDatePicker } from "./DatePicker.js";
 import { createButton } from './Button.js';
 
 export const captureBirthDate = ({ title, subtitle, onSubmit }) => {
-    // Initialize state for birthdate
+
     initializeState({
         birthdate: null,
     });
