@@ -32,7 +32,7 @@ export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 
             .split('') // Split by character
             .map((char) => {
                 if (char === ' ') {
-                    return `<span class="char space" style="display:inline-block;">&nbsp;</span>`; // Visible space
+                    return ` `; // Visible space
                 }
                 return `<span class="char">${char}</span>`; // Wrap each character
             })
