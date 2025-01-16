@@ -16,6 +16,7 @@ export const createBaseLayout = ({
 
     // Main container
     const container = document.createElement('div');
+    container.className = 'parent-container';
     Object.assign(container.style, {
         display: 'flex',
         flexDirection: 'column',
@@ -52,12 +53,16 @@ export const createBaseLayout = ({
 
     // Content container
     const contentContainer = document.createElement('div');
+    // add a relevant and short className to the contentContainer
+    contentContainer.className = 'content-container';
+    
     Object.assign(contentContainer.style, {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        width: '100%',
+        width: '100vw',
+        height: '100vh',
         padding: '128px 24px',
         boxSizing: 'border-box',
         zIndex: '1',
