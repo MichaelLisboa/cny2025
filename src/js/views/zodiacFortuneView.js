@@ -52,12 +52,12 @@ const zodiacPresentation = () => {
     Object.assign(zodiacImageContainer.style, {
         position: 'relative',
         width: '100%',
-        height: '70vh',
+        height: '55vh',
         marginBottom: '1.5rem',
     });
 
     // Element background image
-    const elementImage = createPictureElement(`${element.toLowerCase()}.png`);
+    const elementImage = createPictureElement(`element-${element.toLowerCase()}.png`);
     const elementImageElement = elementImage.querySelector('img');
     Object.assign(elementImageElement.style, {
         position: 'absolute',
@@ -68,6 +68,7 @@ const zodiacPresentation = () => {
         opacity: '0.5',
         objectFit: 'contain',
         zIndex: '1',
+        willChange: 'transform, opacity',
     });
     zodiacImageContainer.appendChild(elementImage);
 
@@ -82,13 +83,15 @@ const zodiacPresentation = () => {
         height: '100%',
         objectFit: 'contain',
         zIndex: '2',
+        willChange: 'transform, opacity',
     });
     zodiacImageContainer.appendChild(zodiacImage);
 
     // Title Section
     const title = document.createElement('h1');
-    title.textContent = `${element} ${zodiac}`;
+    title.textContent = `${element || 'Unknown Element'} ${zodiac || 'Unknown Zodiac'}`;
     Object.assign(title.style, {
+        marginTop: '0',
         textAlign: 'center',
         color: 'white',
     });
@@ -109,11 +112,18 @@ const zodiacPresentation = () => {
         Object.assign(fortuneTitle.style, {
             textAlign: 'center',
             color: 'white',
+            opacity: '0',
+            display: 'none',
+            transition: 'opacity 0.5s ease-in-out',
         });
 
         const fortuneBody = document.createElement('p');
         fortuneBody.textContent = fortune.body;
-        fortuneBody.className = 'text-medium';
+        Object.assign(fortuneBody.style, {
+            opacity: '0',
+            display: 'none',
+            transition: 'opacity 0.5s ease-in-out',
+        });
 
         fortuneSection.appendChild(fortuneTitle);
         fortuneSection.appendChild(fortuneBody);
@@ -136,18 +146,18 @@ export const zodiacFortuneView = () => {
     const renderMainContent = () => {
         // Animate the Zodiac Fortune into view
         const fortuneContent = zodiacPresentation();
+
+        // Smooth transition for fortuneContent without overshooting
         gsap.fromTo(
             fortuneContent,
-            { y: '-100%', opacity: 0 },
-            { y: '0%', opacity: 1, duration: 2, ease: 'ease-in-out' }
+            { y: '-50%', opacity: 0 },
+            { y: '0%', opacity: 1, duration: 1.8, ease: 'power1.out' }
         );
 
         contentContainer.appendChild(fortuneContent);
 
         // Enable scrollability after animation completes
-        setTimeout(() => {
-            contentContainer.style.overflowY = 'auto';
-        }, 500);
+        gsap.to(contentContainer, { overflowY: 'auto', delay: 1.8 });
     };
 
     if (birthdateExists()) {
@@ -163,6 +173,8 @@ export const zodiacFortuneView = () => {
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
+        height: "100vh",
+        overflow: "auto", // Prevents overflow glitches during animation
     });
     birthdatePickerContainer.className = "birthdate-picker-container";
 
@@ -190,27 +202,32 @@ export const zodiacFortuneView = () => {
                 dispatch({ type: "SET_ZODIAC", payload: animal });
                 dispatch({ type: "SET_ELEMENT", payload: element });
 
-                // Animate the transition from the picker to Zodiac fortune
-                gsap.to(birthdatePickerContainer, {
-                    y: '100%',
-                    opacity: 0,
-                    duration: 2,
-                    ease: 'ease-in-out',
-                    onComplete: () => {
-                        birthdatePickerContainer.remove();
+                // Timeline for syncing animations
+                const timeline = gsap.timeline();
+
+                timeline
+                    // Slide pickerComponent out completely before removal
+                    .to(birthdatePickerContainer, {
+                        y: '100%',
+                        opacity: 0,
+                        duration: 1,
+                        ease: 'power1.inOut',
+                    })
+                    // Render zodiacPresentation content after picker animation
+                    .add(() => {
                         renderMainContent();
-                    },
-                });
+                    }, 1.25) // Delayed until pickerComponent is fully off-screen
+                    .add(() => {
+                        birthdatePickerContainer.remove(); // Remove after zodiac content starts
+                    }, 1);
 
-                // Get the background image element from the layout
+                // Background scroll effect synchronized with pickerComponent
                 const backgroundImageElement = container.querySelector('img');
-
-                // Background scroll effect
-                gsap.to(backgroundImageElement, {
-                    top: '0%',         // Move the background image to align its top with the container's top
-                    duration: 3,          // Slow, dramatic effect
-                    ease: 'ease-in-out',  // Smooth animation
-                });
+                timeline.to(backgroundImageElement, {
+                    top: '0%',
+                    duration: 3,
+                    ease: 'power1.out',
+                }, 0); // Starts concurrently with picker animation
             },
         });
         birthdatePickerContainer.appendChild(pickerComponent);

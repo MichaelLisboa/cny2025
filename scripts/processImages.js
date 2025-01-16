@@ -12,7 +12,7 @@ async function processImages() {
   try {
     // Dynamically import p-limit
     const { default: pLimit } = await import('p-limit');
-    const limit = pLimit(4);
+    const limit = pLimit(8);
 
     // Clear both directories
     await fs.emptyDir(publicOutputFolder);
