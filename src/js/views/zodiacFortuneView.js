@@ -19,7 +19,7 @@ gsap.registerPlugin(TextPlugin);
  * @param {number} options.fadeDuration - Duration for parent fade-in (default: 0.5s).
  * @param {number} options.startDelay - Delay before starting the animation (default: 0.5s).
  */
-export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 0.5, startDelay = 0.5 } = {}) {
+export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 0.5, startDelay = 0 } = {}) {
     if (!elements || elements.length === 0) return;
 
     // Ensure elements are hidden initially and split their text content
@@ -58,17 +58,17 @@ export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 
                             .to(el, { opacity: 1, duration: fadeDuration, ease: 'power1.out' }) // Fade in the element
                             .fromTo(
                                 characters,
-                                { y: 20, opacity: 0 },
+                                { y: 40, opacity: 0, scale: 0.05 },
                                 {
                                     y: 0,
+                                    scale: 1,
                                     opacity: 1,
                                     duration: 0.5,
                                     stagger: waveSpeed, // Wave effect
                                     ease: 'power1.out',
                                 },
-                                `-=${fadeDuration / 2}` // Start wave slightly after fade begins
-                            ),
-                        `+=0.2` // Add delay between animations
+                                `-=${fadeDuration / 4}` // Start wave slightly after fade begins
+                            )
                     );
 
                     observer.unobserve(el); // Stop observing this element
@@ -181,30 +181,24 @@ const zodiacPresentation = () => {
     Object.assign(fortuneSection.style, {
         display: 'flex',
         flexDirection: 'column',
-        textAlign: 'left', // Ensure text alignment is left
-        color: 'white',
         width: '100%',
         maxWidth: '600px',
     });
 
     fortunes.forEach((fortune) => {
         const fortuneTitle = document.createElement('h3');
+        fortuneTitle.classList = 'inline-header text-white';
         fortuneTitle.textContent = fortune.title;
         Object.assign(fortuneTitle.style, {
-            textAlign: 'left', // Ensure text alignment is left
-            width: '100%',
-            color: 'white',
             opacity: '0',
             display: 'none',
             transition: 'opacity 0.5s ease-in-out',
         });
 
         const fortuneBody = document.createElement('p');
-        fortuneBody.className = 'text-medium';
+        fortuneBody.classList = 'text-medium text-white';
         fortuneBody.textContent = fortune.body;
         Object.assign(fortuneBody.style, {
-            textAlign: 'left', // Ensure text alignment is left
-            width: '100%',
             opacity: '0',
             display: 'none',
             transition: 'opacity 0.5s ease-in-out',
@@ -224,7 +218,7 @@ const zodiacPresentation = () => {
 
 export const zodiacFortuneView = () => {
     const { container, contentContainer } = createBaseLayout({
-        backgroundImage: 'land-and-sky-background.png',
+        backgroundImage: 'release-lantern.png',
         scrollable: false,
         backgroundPositionY: '100%',
     });
@@ -250,13 +244,13 @@ export const zodiacFortuneView = () => {
         timeline.fromTo(
             fortuneContent,
             { y: '-50%', opacity: 0 },
-            { y: '0%', opacity: 1, duration: 1.8, ease: 'power1.out' }
+            { y: '0%', opacity: 1, duration: 3, ease: 'power1.out' }
         );
 
         contentContainer.appendChild(fortuneContent);
 
         // Enable scrollability after animation completes
-        timeline.to(contentContainer, { overflowY: 'auto', delay: 1.8 });
+        timeline.to(contentContainer, { overflowY: 'auto', delay: 0.5 });
     };
 
     if (birthdateExists()) {
@@ -324,7 +318,7 @@ export const zodiacFortuneView = () => {
                 const backgroundImageElement = container.querySelector('img');
                 timeline.to(backgroundImageElement, {
                     top: '0%',
-                    duration: 3,
+                    duration: 10,
                     ease: 'power1.out',
                 }, 0); // Starts concurrently with picker animation
             },

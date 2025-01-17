@@ -38,14 +38,21 @@ div {
   user-select: none; /* Prevent text selection */
 }
 
+.text-white {
+  color: #fff;
+}
+
 p.text-medium {
   font-size: 1.25rem;
-  line-height: 1.5;
+  font-weight: 300;
+  line-height: 1.2;
+  margin: 0;
 }
 
 p.text-large {
   font-size: 1.5rem;
-  line-height: 1.5;
+  font-weight: 300;
+  line-height: 1.2;
 }
 
 picture {
@@ -85,8 +92,9 @@ h1 {
   font-family: 'HoganBrush', sans-serif;
   font-size: 3.5rem;
   font-weight: 400;
-  line-height: 0.8;
+  line-height: 1;
   color: #fff;
+  margin-bottom: 0;
 }
 
 /* Custom font HoganBrush */
@@ -101,10 +109,8 @@ h2 {
 /* Custom font HoganBrush */
 h3 {
   font-size: 1.75rem;
-  font-weight: 400;
-  line-height: 1.2;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  font-weight: 600;
+  line-height: 1;
   color: #fff;
 }
 
@@ -125,8 +131,12 @@ h5 {
 }
 
 /* h3 tags followed by p tags should be 8px apart */
-h3 + p {
-  margin-top: 0px;
+.inline-header {
+  margin-bottom: 8px;
+}
+
+p + .inline-header {
+  margin-top: 1.5rem;
 }
 
 
