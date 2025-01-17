@@ -76,7 +76,7 @@ export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 
 
             timeline.play(); // Play the timeline for visible elements
         },
-        { threshold: 0.2, rootMargin: '0px 0px -10% 0px' } // Adjust threshold and root margin
+        { threshold: 0.2, rootMargin: '0px 0px -2% 0px' } // Adjust threshold and root margin
     );
 
     // Add an index to ensure order is maintained
@@ -218,8 +218,8 @@ const zodiacPresentation = () => {
 
 export const zodiacFortuneView = () => {
     const { container, contentContainer } = createBaseLayout({
-        backgroundImage: 'release-lantern.png',
-        scrollable: false,
+        backgroundImage: 'background-zodiac-sky.jpg',
+        scrollable: true,
         backgroundPositionY: '100%',
     });
 
@@ -235,9 +235,6 @@ export const zodiacFortuneView = () => {
                 // Set `data-text` attribute for safety (optional)
                 textElements.forEach(el => el.dataset.text = el.textContent);
                 animateTextSequence(textElements, { waveSpeed: 0.02, fadeDuration: 0.25 });
-
-
-
             }
         });
 
@@ -250,7 +247,7 @@ export const zodiacFortuneView = () => {
         contentContainer.appendChild(fortuneContent);
 
         // Enable scrollability after animation completes
-        timeline.to(contentContainer, { overflowY: 'auto', delay: 0.5 });
+        // timeline.to(contentContainer, { overflowY: 'auto', delay: 0.5 });
     };
 
     if (birthdateExists()) {
