@@ -11,14 +11,6 @@ import { Observer } from 'gsap/Observer';
 gsap.registerPlugin(Observer);
 gsap.registerPlugin(TextPlugin);
 
-/**
- * Animate text elements in sequence with optional parent background fade-in.
- * @param {HTMLElement[]} elements - Array of elements to animate.
- * @param {Object} options - Animation options.
- * @param {number} options.typingSpeed - Speed of character typing (default: 0.05s per character).
- * @param {number} options.fadeDuration - Duration for parent fade-in (default: 0.5s).
- * @param {number} options.startDelay - Delay before starting the animation (default: 0.5s).
- */
 export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 0.5, startDelay = 0 } = {}) {
     if (!elements || elements.length === 0) return;
 
@@ -55,20 +47,20 @@ export function animateTextSequence(elements, { waveSpeed = 0.1, fadeDuration = 
                     // Add wave animation for this element
                     timeline.add(
                         gsap.timeline()
-                            .to(el, { opacity: 1, duration: fadeDuration, ease: 'power1.out' }) // Fade in the element
+                            .to(el, { opacity: 1, duration: fadeDuration, ease: 'power1.out' }) // Fade in
                             .fromTo(
                                 characters,
-                                { y: 40, opacity: 0, scale: 0.05 },
+                                { y: 40, opacity: 0, scale: 0.025 },
                                 {
                                     y: 0,
                                     scale: 1,
                                     opacity: 1,
                                     duration: 0.5,
-                                    stagger: waveSpeed, // Wave effect
+                                    stagger: waveSpeed,
                                     ease: 'power1.out',
-                                },
-                                `-=${fadeDuration / 4}` // Start wave slightly after fade begins
-                            )
+                                }
+                            ),
+                        `-=${.5}` // Overlap by half the fade duration
                     );
 
                     observer.unobserve(el); // Stop observing this element
@@ -230,10 +222,7 @@ export const zodiacFortuneView = () => {
         // Smooth transition for fortuneContent without overshooting
         const timeline = gsap.timeline({
             onComplete: () => {
-                // Prepare elements for animation
-                const textElements = Array.from(document.querySelectorAll('h3, p'));
-                // Set `data-text` attribute for safety (optional)
-                textElements.forEach(el => el.dataset.text = el.textContent);
+                const textElements = Array.from(fortuneContent.querySelectorAll('h3, p'));
                 animateTextSequence(textElements, { waveSpeed: 0.02, fadeDuration: 0.25 });
             }
         });
