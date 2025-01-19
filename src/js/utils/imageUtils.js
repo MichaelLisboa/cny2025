@@ -24,10 +24,10 @@ const generateSrcset = (imageName, format, sizes) => {
  * @param {string} imageNameWithExtension - Full image name with extension (e.g., "example.png")
  * @returns {HTMLPictureElement} - The created <picture> element
  */
-export const createPictureElement = (imageNameWithExtension) => {
+export const createPictureElement = (imageNameWithExtension, customAlt = "") => {
   if (!imageNameWithExtension || !imageNameWithExtension.includes('.')) {
-    console.error('Invalid image name provided:', imageNameWithExtension);
-    return null;
+      console.error('Invalid image name provided:', imageNameWithExtension);
+      return null;
   }
 
   const [name, extension] = imageNameWithExtension.split('.');
@@ -44,12 +44,31 @@ export const createPictureElement = (imageNameWithExtension) => {
   // Add fallback <img> tag with low-resolution placeholder
   const img = document.createElement('img');
   img.src = `/assets/images/${name}-lowres.webp`; // Low-resolution placeholder
-  img.alt = name;
+
+  // Generate meaningful alt text
+  img.alt = customAlt || name
+      .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
+      .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letters
+
   img.classList.add('blur-up'); // Add a class for styling the blur-up effect
+  img.loading = 'lazy'; // Lazy load for better performance
+
+  // Placeholder styles
+  Object.assign(img.style, {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover', // Ensure the placeholder matches final image dimensions
+      transition: 'opacity 0.5s ease, filter 0.5s ease', // Smooth transition
+      filter: 'blur(10px)', // Initial blur for placeholder
+  });
+
+  // Onload event for smooth blur-up transition
   img.onload = () => {
-    img.classList.remove('blur-up'); // Remove blur-up class once loaded
-    img.src = `/assets/images/${name}-original.${extension}`; // Replace with original image
+      img.style.filter = 'none'; // Remove the blur effect
+      img.classList.remove('blur-up'); // Remove blur-up class once loaded
+      img.src = `/assets/images/${name}-original.${extension}`; // Replace with original image
   };
+
   picture.appendChild(img);
 
   return picture;
