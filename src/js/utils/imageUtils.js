@@ -11,7 +11,7 @@ const sizes = `(max-width: 480px) 80vw,
                (max-width: 1440px) 50vw, 
                (max-width: 1920px) 60vw, 
                (min-width: 1921px) 60vw`; // Tailored for responsive widths
-const breakpoints = [480, 768, 1024, 1440, 1920, 3840]; // Expected sizes generated during build
+const breakpoints = [480, 768, 1024, 1440, 1920, 3840, 960, 1536, 2048, 2880]; // Added 2x and 3x sizes
 
 const generateSrcset = (imageName, format, sizes) => {
   return sizes
@@ -41,11 +41,15 @@ export const createPictureElement = (imageNameWithExtension) => {
   sourceWebP.sizes = sizes;
   picture.appendChild(sourceWebP);
 
-  // Add fallback <img> tag
+  // Add fallback <img> tag with low-resolution placeholder
   const img = document.createElement('img');
-  img.src = `/assets/images/${name}-original.${extension}`; // Fallback to original image
+  img.src = `/assets/images/${name}-lowres.webp`; // Low-resolution placeholder
   img.alt = name;
-  // img.loading = 'lazy';
+  img.classList.add('blur-up'); // Add a class for styling the blur-up effect
+  img.onload = () => {
+    img.classList.remove('blur-up'); // Remove blur-up class once loaded
+    img.src = `/assets/images/${name}-original.${extension}`; // Replace with original image
+  };
   picture.appendChild(img);
 
   return picture;

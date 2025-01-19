@@ -6,7 +6,8 @@ const glob = require('glob');
 const inputFolder = path.join(__dirname, '../src/assets/images');
 const publicOutputFolder = path.join(__dirname, '../public/assets/images');
 const distOutputFolder = path.join(__dirname, '../dist/assets/images');
-const resolutions = [480, 768, 1024, 1440, 1920, 3840];
+const resolutions = [480, 768, 1024, 1440, 1920, 3840, 960, 1536, 2048, 2880]; // Added 2x and 3x sizes
+const lowResWidth = 20; // Width for low-resolution placeholder
 
 async function processImages() {
   try {
@@ -48,6 +49,15 @@ async function processImages() {
               .toFile(path.join(publicOutputFolder, `${fileName}-${resolution}.webp`))
           );
         }
+
+        // Generate low-resolution placeholder
+        tasks.push(
+          sharp(file)
+            .resize({ width: lowResWidth })
+            .blur()
+            .toFormat('webp')
+            .toFile(path.join(publicOutputFolder, `${fileName}-lowres.webp`))
+        );
 
         tasks.push(
           sharp(file)

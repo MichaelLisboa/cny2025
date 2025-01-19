@@ -129,7 +129,6 @@ const lazyLoadView = async (viewPath) => {
 // Add lazy-loaded route example
 routes['/fortune'] = async () => {
     const module = await lazyLoadView('../views/zodiacFortuneView.js');
-    console.log(module);
     return module.zodiacFortuneView();
 };
 
