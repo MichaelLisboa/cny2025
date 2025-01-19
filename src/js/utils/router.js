@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { createBaseLayout } from '../layouts/layout.js';
 import { home } from '../views/home';
+import { zodiacFortuneView } from '../views/zodiacFortuneView.js';
 // import { createLanternView } from './views/createLanternView';
 // import { previewLanternView } from './views/previewLanternView';
 // import { shareLanternView } from './views/shareLanternView';
@@ -9,15 +10,12 @@ import { home } from '../views/home';
 // Define your routes
 const routes = {
     '/': home,
-    '/fortune': async () => {
-        const module = await import('../views/zodiacFortuneView.js');
-        return module.zodiacFortuneView();
-    },
     // '/enter-birthdate': enterBirthdateView,
     // '/create-lantern': createLanternView,
     // '/view-lantern': previewLanternView,
     // '/share-lantern': shareLanternView,
     // '/view-lanterns': viewLanternsView,
+    '/fortune': zodiacFortuneView,
 };
 
 // 1. Load the correct view with transitions
@@ -55,7 +53,7 @@ export const loadView = async (path) => {
 
     // Load the new view if it exists
     if (routes[path]) {
-        const viewNode = await routes[path]();
+        const viewNode = routes[path]();
         if (viewNode) {
             routerContainer.appendChild(viewNode);
 
@@ -121,15 +119,14 @@ export const navigateTo = (path) => {
 
 // 4. Lazy loading for performance optimization
 const lazyLoadView = async (viewPath) => {
-    console.log('Lazy loading:', viewPath);
     const module = await import(viewPath);
-    return module;
+    return module.default();
 };
 
 // Add lazy-loaded route example
-routes['/fortune'] = async () => {
-    const module = await lazyLoadView('../views/zodiacFortuneView.js');
-    return module.zodiacFortuneView();
+routes['/settings'] = async () => {
+    const settingsView = await lazyLoadView('./views/settingsView.js');
+    return settingsView();
 };
 
 // 5. Scroll position management
