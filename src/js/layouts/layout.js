@@ -3,14 +3,15 @@ import getDeviceInfo from '../utils/deviceUtils.js';
 import { gsap } from 'gsap';
 
 export const createBaseLayout = ({
-    backgroundImage = 'default-image.png',
+    backgroundImage = 'starry-sky-background.png',
     contentContainerStyles = {},
-    scrollable = true,
-    animationSettings = { intensity: 0.2, easing: 'power2.out' },
+    scrollable = false,
     additionalLayers = [],
     gradientBackground = null,
+    animationSettings = { intensity: 0.2, easing: 'power2.out' },
     onMouseMove = null,
     onTouchStart = null,
+    alignImage = 'bottom', // New parameter for image alignment
 }) => {
     const { isMobile } = getDeviceInfo();
 
@@ -39,7 +40,7 @@ export const createBaseLayout = ({
     const backgroundImageElement = background.querySelector('img');
     Object.assign(backgroundImageElement.style, {
         position: 'absolute',
-        bottom: isMobile ? '-2%' : '-20%',
+        [alignImage]: isMobile ? '-2%' : '-20%', // Align image based on the new parameter
         left: '50%',
         transform: 'translateX(-50%)',
         width: isMobile ? '300%' : '125%',

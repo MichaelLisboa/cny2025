@@ -4,6 +4,7 @@
   src: url('/fonts/HoganBrush.woff') format('woff'); /* Path starts with '/' for public assets */
   font-weight: normal; /* Normal weight */
   font-style: normal;  /* Normal style */
+  font-display: swap;  /* Ensure text is displayed immediately using a fallback font until the custom font is loaded */
 }
 
 /* Main stylesheet */
@@ -137,6 +138,48 @@ h5 {
 
 p + .inline-header {
   margin-top: 1.5rem;
+}
+
+/* Responsive background image */
+.background-image {
+  width: 300%;
+  height: auto;
+}
+
+@media (min-width: 480px) {
+  .background-image {
+    width: 200%;
+  }
+}
+
+@media (min-width: 768px) {
+  .background-image {
+    width: 150%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .background-image {
+    width: 125%;
+  }
+}
+
+@media (min-width: 1440px) {
+  .background-image {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1920px) {
+  .background-image {
+    width: 75%;
+  }
+}
+
+@media (min-width: 3840px) {
+  .background-image {
+    width: 50%;
+  }
 }
 
 
